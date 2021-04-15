@@ -1,0 +1,38 @@
+const customForms = require('@tailwindcss/custom-forms');
+const {colors} = require('tailwindcss/defaultTheme')
+
+module.exports = {
+    future: {
+        removeDeprecatedGapUtilities: true,
+        purgeLayersByDefault: true
+    },
+    purge: {
+        content: [
+            './resources/**/*.blade.php',
+            './resources/js/components/**/*.vue',
+            './resources/js/views/**/*.vue',
+        ],
+        options: {
+            safelist: ['main-modal', 'fixed', 'w-full', 'h-100', 'inset-0', 'z-50', 'overflow-hidden', 'flex', 'justify-center', 'items-center', 'animated', 'fadeOut', 'hidden']
+        }
+    },
+    theme: {
+        extend: {
+            fontFamily: {
+                'sans': ['Fira Sans', 'Sans-serif']
+            },
+            colors: {
+                'primary': colors.indigo,
+                'secondary': colors.gray,
+            }
+        },
+    },
+    variants: {
+        backgroundColor: ['responsive', 'hover', 'focus', 'active'],
+        opacity: ['disabled'],
+    },
+    plugins: [
+        customForms,
+        require('@tailwindcss/typography'),
+    ],
+}

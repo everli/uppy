@@ -1,0 +1,74 @@
+version: '3'
+
+networks:
+  uppy:
+
+volumes:
+  mysql_data:
+
+services:
+  nginx:
+    image: nginx:stable-alpine
+    volumes:
+      - .:/var/www/
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "${DOCKER_NGINX_PORT:-8080}:80"
+    networks:
+      - uppy
+
+  php:
+    build: docker/php
+    volumes:
+      - ./:/var/www
+      - ./docker/php/uppy.ini:/usr/local/etc/php/conf.d/uppy.ini
+    working_dir: /var/www
+    networks:
+      - uppy
+
+  mysql:
+    container_name: uppy_mysql
+    image: mysql:8.0
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "${DOCKER_MYSQL_PORT:-3306}:3306"
+    environment:
+      MYSQL_DATABASE: "${DB_DATABASE:-uppy}"
+      MYSQL_USER: "${DB_USERNAME:-uppy}"
+      MYSQL_PASSWORD: "${DB_PASSWORD:-uppy}"
+      MYSQL_ROOT_PASSWORD: "Vo0869_5-bTu"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql:/docker-entrypoint-initdb.d
+    networks:
+      - uppy
+
+  composer:
+    image: composer:latest
+    volumes:
+      - ./:/var/www
+    working_dir: /var/www
+    depends_on:
+      - php
+    networks:
+      - uppy
+
+  artisan:
+    build: docker/php
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - mysql
+    working_dir: /var/www
+    entrypoint: ['/var/www/artisan']
+    networks:
+      - uppy
+
+  node:
+    image: library/node:14-alpine
+    volumes:
+      - ./:/var/www
+    working_dir: /var/www
+    networks:
+      - uppy
