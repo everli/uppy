@@ -28,3 +28,4 @@ Homestead.json
 # ide
 /.idea
 .DS_Store
+tailwind.config.js
