@@ -15,7 +15,7 @@ class ProvidersTest extends TestCase
      */
     public function it_enforce_https()
     {
-        Env::getRepository()->set('ENFORCE_HTTPS','true');
+        $_ENV['ENFORCE_HTTPS'] = true;
 
         $url = $this->createApplication()
             ->make('url')
@@ -29,7 +29,7 @@ class ProvidersTest extends TestCase
      */
     public function it_not_enforce_https()
     {
-        Env::getRepository()->set('ENFORCE_HTTPS','false');
+        $_ENV['ENFORCE_HTTPS'] = false;
 
         $url = $this->createApplication()
             ->make('url')
