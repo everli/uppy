@@ -18,7 +18,7 @@ mix.sass('resources/sass/app.scss', 'public/css')
         processCssUrls: false,
         postCss: [tailwindcss('tailwind.config.js')],
     })
-    .js('resources/js/app.js', 'public/js')
+    .js('resources/js/app.js', 'public/js').vue({ version: 2 })
     .scripts([
         'node_modules/marked/marked.min.js',
     ], 'public/js/vendor.js');
