@@ -13,6 +13,7 @@ use App\Http\Resources\V1\ApplicationUpdateResource;
 use App\Models\Application;
 use App\Platforms\Platform;
 use App\Repositories\ApplicationRepository;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -37,7 +38,7 @@ class ApplicationApiController extends Controller
                     // ...application id and platform, with the latest available build
                     return $query->select(['application_id', 'platform', DB::raw('MAX(available_from)')])
                         ->from('builds')
-                        ->where('available_from', '<=', DB::raw('NOW()')) // that are actually available
+                        ->where('available_from', '<=', Carbon::now()->toDateTimeString()) // that are actually available
                         ->groupBy(['application_id', 'platform']); // grouped by platform and application, and we get always the last version for each app and version
                 })->orderBy('platform'); // order the builds by platform
             }
