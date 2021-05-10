@@ -27,10 +27,10 @@
     </div>
 
     <div class="flex-grow py-4 px-6" v-if="changelog!=null">
-        <div class="my-2 text-gray-600 text-sm font-semibold select-none cursor-pointer flex justify-between">
-          {{ $t('changelog') }}
-        </div>
-        <div v-html="markdown(changelog.content)" class="mt-6 space-y-3 text-sm prose max-w-full" />
+      <div class="my-2 text-gray-600 text-sm font-semibold select-none cursor-pointer flex justify-between">
+        {{ $t('changelog') }}
+      </div>
+      <div v-html="markdown(changelog.content)" class="mt-6 space-y-3 text-sm prose max-w-full"/>
     </div>
     <div class="flex-grow-0 text-center text-xs py-3 font-semibold">
       <p class="text-primary-800">&copy; {{ app.organization }} {{ new Date().getFullYear() }}</p>
@@ -39,13 +39,8 @@
 </template>
 
 <script>
-import VueCollapse from "vue2-collapse/src";
-
 export default {
   name: 'Download',
-  components: {
-    VueCollapse,
-  },
   data() {
     return {
       app: {},

@@ -27,12 +27,12 @@
 
 <script>
 import Base from '../layout/Base';
-import UploadBuild from './UploadBuild';
-import PlatformCard from '../../components/PlatformCard';
+import PlatformCard from '../components/PlatformCard';
+import Upload from "./Upload";
 
 export default {
   name: 'ApplicationBuilds',
-  components: {PlatformCard, UploadBuild, Base},
+  components: {PlatformCard, Upload, Base},
   data() {
     return {
       appName: null,

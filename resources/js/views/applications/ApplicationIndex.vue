@@ -22,7 +22,7 @@
 
 <script>
 import Base from '../layout/Base';
-import ApplicationCard from '../../components/ApplicationCard';
+import ApplicationCard from '../components/ApplicationCard';
 
 export default {
   name: 'ApplicationIndex',

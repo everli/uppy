@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import ValidationAlert from '../../components/ValidationAlert';
+import ValidationAlert from '../components/ValidationAlert';
 
 export default {
   name: 'Login',

@@ -76,8 +76,8 @@
 
 <script>
 import Base from '../layout/Base';
-import ValidationAlert from '../../components/ValidationAlert';
-import ChangelogTable from "../../components/ChangelogTable";
+import ValidationAlert from '../components/ValidationAlert';
+import ChangelogTable from "../components/ChangelogTable";
 
 export default {
   name: 'UploadBuild',

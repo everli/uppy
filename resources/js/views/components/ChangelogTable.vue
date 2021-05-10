@@ -90,7 +90,7 @@
 </template>
 
 <script>
-import languages from '../config/languages.json'
+import languages from '../../config/languages.json'
 
 export default {
   name: "ChangelogTable",
