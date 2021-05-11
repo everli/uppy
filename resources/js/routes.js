@@ -44,7 +44,7 @@ export const routes = [
     },
     {
         name: 'application.build.index',
-        path: '/applications/:id/builds',
+        path: '/applications/:application/builds',
         component: ApplicationBuilds,
         meta: {
             auth: true
@@ -52,7 +52,7 @@ export const routes = [
     },
     {
         name: 'application.build.upload',
-        path: '/applications/:id/builds/upload',
+        path: '/applications/:application/builds/upload',
         component: Upload,
         meta: {
             auth: true
@@ -60,7 +60,7 @@ export const routes = [
     },
     {
         name: 'application.build.edit',
-        path: '/applications/:id/builds/:build/edit',
+        path: '/applications/:application/builds/:build/edit',
         component: Edit,
         meta: {
             auth: true

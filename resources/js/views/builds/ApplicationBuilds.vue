@@ -12,7 +12,7 @@
       </h3>
       <div class="text-base mt-2">
         <router-link
-            :to="{name: 'application.build.upload', params: {id: this.$route.params.id}}"
+            :to="{name: 'application.build.upload', params: {application: this.$route.params.application}}"
             class="px-2 py-1 bg-primary-800 text-white rounded hover:bg-primary-600 focus:outline-none focus:bg-primary-700 inline-flex items-center">
           <svg class="fill-current h-6 w-6 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                fill="currentColor">
@@ -26,7 +26,7 @@
     </div>
 
     <div class="mt-6 flex flex-wrap -mb-4">
-      <PlatformCard v-for="(platformBuilds, platformName) in builds[this.$route.params.id]" :key="platformName"
+      <PlatformCard v-for="(platformBuilds, platformName) in builds" :key="platformName"
                     :builds="platformBuilds"
                     :platform="platformName"/>
     </div>
@@ -42,20 +42,23 @@ import {mapState} from "vuex";
 export default {
   name: 'ApplicationBuilds',
   components: {PlatformCard, Upload, Base},
-  created() {
+  data() {
+    return {
+      builds: {}
+    }
+  },
+  async created() {
     if (_.isEmpty(this.$store.state.application.applications)) {
-      this.$store.dispatch('application/getApplicationById', this.$route.params.id).then(() =>
-          this.$store.dispatch('application/setCurrentAppById', this.$route.params.id)
-      );
+      await this.$store.dispatch('application/getApplicationById', this.$route.params.application);
     }
-    if (_.isEmpty(this.builds[this.$route.params.id])) {
-      this.$store.dispatch('build/getBuildsByApplication', this.$route.params.id);
-    }
+    await this.$store.dispatch('application/setCurrentAppById', this.$route.params.application)
+
+    const response = await axios.get(`/api/v1/applications/${this.$route.params.application}/builds`);
+    this.builds = response.data.data;
   },
   computed: {
     ...mapState({
       app: state => state.application.currentApp ?? {'name': null},
-      builds: state => state.build.builds
     })
   }
 }

@@ -13,7 +13,7 @@
     </div>
 
     <div class="mt-4">
-      <div class="p-6 bg-white rounded-md shadow-md mb-2">
+      <div class="border border-gray-400 bg-white rounded p-4 flex flex-col justify-between leading-normal shadow-sm hover:shadow-lg mr-2 mt-2">
         <ValidationAlert :errors="errors"></ValidationAlert>
 
         <form @submit.prevent="uploadBuild" class="mt-2" id="upload-build">
@@ -90,12 +90,11 @@ export default {
       changelogs: {}
     }
   },
-  created() {
+  async created() {
     if (_.isEmpty(this.$store.state.application.applications)) {
-      this.$store.dispatch('application/getApplicationById', this.$route.params.id).then(() =>
-          this.$store.dispatch('application/setCurrentAppById', this.$route.params.id)
-      );
+      await this.$store.dispatch('application/getApplicationById', this.$route.params.application);
     }
+    await this.$store.dispatch('application/setCurrentAppById', this.$route.params.application)
   },
   computed: {
     ...mapState({
@@ -123,7 +122,7 @@ export default {
           .then(() => {
             this.$router.push({
               name: 'application.build.index',
-              params: {id: this.$route.params.id}
+              params: {application: this.$route.params.application}
             });
           })
           .catch(e => {

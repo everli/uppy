@@ -13,7 +13,7 @@
     </div>
 
     <div class="mt-4">
-      <div class="p-6 bg-white rounded-md shadow-md mb-2">
+      <div class="border border-gray-400 bg-white rounded p-4 flex flex-col justify-between leading-normal shadow-sm hover:shadow-lg mr-2 mt-2">
         <ValidationAlert :errors="errors"></ValidationAlert>
 
         <form @submit.prevent="create" class="mt-2" id="create-application">
