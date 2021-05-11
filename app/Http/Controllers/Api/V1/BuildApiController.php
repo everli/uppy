@@ -23,7 +23,7 @@ class BuildApiController extends Controller
 {
 
     /**
-     * @param Application $application
+     * @param  Application  $application
      * @return ApiResource
      */
     public function index(Application $application): ApiResource
@@ -34,9 +34,9 @@ class BuildApiController extends Controller
     }
 
     /**
-     * @param BuildCreateRequest $request
-     * @param Application $application
-     * @param PlatformService $platforms
+     * @param  BuildCreateRequest  $request
+     * @param  Application  $application
+     * @param  PlatformService  $platforms
      * @return ApiResource
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -52,8 +52,19 @@ class BuildApiController extends Controller
     }
 
     /**
-     * @param BuildUpdateRequest $request
-     * @param Build $build
+     * @param  Build  $build
+     * @return ApiResource
+     */
+    public function show(Build $build): ApiResource
+    {
+        $build->load('changelogs');
+
+        return new ApiResource($build);
+    }
+
+    /**
+     * @param  BuildUpdateRequest  $request
+     * @param  Build  $build
      * @return ApiResource
      */
     public function update(BuildUpdateRequest $request, Build $build): ApiResource

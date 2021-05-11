@@ -13,6 +13,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/applications/{application}/builds', [BuildApiController::class, 'create'])->name('builds.create');
     Route::get('/applications/{application}/builds', [BuildApiController::class, 'index'])->name('applications.builds');
 
+    Route::get('/builds/{build}', [BuildApiController::class, 'show'])->name('builds.show');
     Route::post('/builds/{build}', [BuildApiController::class, 'update'])->name('builds.update');
     Route::delete('/builds/{build}', [BuildApiController::class, 'delete'])->name('builds.delete');
 });

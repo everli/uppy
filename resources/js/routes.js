@@ -7,6 +7,7 @@ import DownloadRedirect from './views/components/DownloadRedirect';
 import NotFound from './views/errors/NotFound';
 import Download from "./views/builds/Download";
 import Upload from "./views/builds/Upload";
+import Edit from "./views/builds/Edit";
 
 export const routes = [
     {
@@ -53,6 +54,14 @@ export const routes = [
         name: 'application.build.upload',
         path: '/applications/:id/builds/upload',
         component: Upload,
+        meta: {
+            auth: true
+        }
+    },
+    {
+        name: 'application.build.edit',
+        path: '/applications/:id/builds/:build/edit',
+        component: Edit,
         meta: {
             auth: true
         }

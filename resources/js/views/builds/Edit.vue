@@ -17,24 +17,19 @@
         <ValidationAlert :errors="errors"></ValidationAlert>
 
         <form @submit.prevent="uploadBuild" class="mt-2" id="upload-build">
-          <div class="mt-4">
-            <label class="text-gray-700" for="version">Version</label>
-            <input id="version" name="version" class="form-input w-full mt-2 rounded-md focus:border-primary-600"
-                   type="text"/>
-          </div>
 
           <div class="mt-4">
             <label class="text-gray-700" for="available_from">Available from</label>
             <input id="available_from" name="available_from"
                    class="form-input w-full mt-2 rounded-md focus:border-primary-600" type="datetime-local"
-                   placeholder="YYYY-MM-DD HH:mm:ss"/>
+                   placeholder="YYYY-MM-DD HH:mm:ss" v-model="build.available_from"/>
           </div>
 
           <div class="mt-4">
             <label class="text-gray-700" for="forced">Forced update</label>
             <div class="mt-2">
               <label class="inline-flex items-center">
-                <input name="forced" id="forced" type="checkbox" class="form-checkbox text-primary-800 h-6 w-6"/>
+                <input name="forced" id="forced" type="checkbox" class="form-checkbox text-primary-800 h-6 w-6" :checked="build.forced"/>
                 <span class="mx-2 text-gray-600 text-sm">This update is mandatory.</span>
               </label>
             </div>
@@ -80,10 +75,14 @@ import ChangelogTable from "../components/ChangelogTable";
 import {mapState} from "vuex";
 
 export default {
-  name: 'Upload',
+  name: 'Edit',
   components: {ChangelogTable, ValidationAlert, Base},
   data() {
     return {
+      build: {
+        available_from: null,
+        forced: false,
+      },
       errors: [],
       uploading: false,
       uploadPercentage: 0,
@@ -96,6 +95,21 @@ export default {
           this.$store.dispatch('application/setCurrentAppById', this.$route.params.id)
       );
     }
+
+    axios.get(`/api/v1/builds/${this.$route.params.build}`).then(response => {
+      const build = response.data.data;
+
+      const availableForm = new Date(build.available_from);
+      availableForm.setMinutes(availableForm.getMinutes() - availableForm.getTimezoneOffset());
+      build.available_from = availableForm.toISOString().slice(0, 16);
+
+      this.build = build;
+      Object.values(build.changelogs).forEach(changelog => {
+        this.changelogs[changelog.locale] = changelog.content;
+      });
+      this.$forceUpdate();
+    });
+
   },
   computed: {
     ...mapState({
@@ -119,21 +133,21 @@ export default {
           this.uploadPercentage = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100));
         }.bind(this)
 
-      }).then(() => this.$store.dispatch('build/getBuildsByApplication', this.$route.params.id))
-          .then(() => {
-            this.$router.push({
-              name: 'application.build.index',
-              params: {id: this.$route.params.id}
-            });
-          })
-          .catch(e => {
-            this.uploadPercentage = 0;
-            this.uploading = false;
-            this.errors = e.response.data.error.errors;
-            if (this.errors.length === 0) {
-              this.errors = [[e.response.data.error.message]];
-            }
-          });
+      }).then(() => {
+        this.$router.push({
+          name: 'application.build.index',
+          params: {id: this.$route.params.id}
+        });
+      }).catch(e => {
+
+        this.uploadPercentage = 0;
+        this.uploading = false;
+        this.errors = e.response.data.error.errors;
+        if (this.errors.length === 0) {
+          this.errors = [[e.response.data.error.message]];
+        }
+
+      });
     }
   }
 }
