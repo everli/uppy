@@ -42,7 +42,7 @@ class ApplicationApiController extends Controller
                         ->groupBy(['application_id', 'platform']); // grouped by platform and application, and we get always the last version for each app and version
                 })->orderBy('platform'); // order the builds by platform
             }
-        ])->paginate(25);
+        ])->get();
 
         return response()->json($applications);
     }

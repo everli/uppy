@@ -41,10 +41,10 @@
       </div>
       <div class="justify-end">
         <div class="flex mt-6 justify-between">
-          <router-link :to="{name: 'application.build.index', params: {slug: app.slug, id: app.id}}" class="px-2 py-1 border border-primary-800 text-primary-800 text-sm rounded hover:bg-primary-600 hover:text-white focus:outline-none focus:text-white focus:bg-primary-700 inline-flex items-center">
+          <router-link :to="{name: 'application.build.index', params: {id: app.id}}" class="px-2 py-1 border border-primary-800 text-primary-800 text-sm rounded hover:bg-primary-600 hover:text-white focus:outline-none focus:text-white focus:bg-primary-700 inline-flex items-center">
             <span>BUILDS</span>
           </router-link>
-          <router-link :to="{name: 'application.build.upload', params: {slug: app.slug, id: app.id}}" class="px-2 py-1 bg-primary-800 text-white rounded hover:bg-primary-600 focus:outline-none focus:bg-primary-700 inline-flex items-center">
+          <router-link :to="{name: 'application.build.upload', params: {id: app.id}}" class="px-2 py-1 bg-primary-800 text-white rounded hover:bg-primary-600 focus:outline-none focus:bg-primary-700 inline-flex items-center">
             <span>UPLOAD</span>
           </router-link>
         </div>

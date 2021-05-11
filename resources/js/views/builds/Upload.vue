@@ -8,7 +8,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
         </a>
-        {{ appName }}
+        {{ app.name }}
       </h3>
     </div>
 
@@ -78,13 +78,13 @@
 import Base from '../layout/Base';
 import ValidationAlert from '../components/ValidationAlert';
 import ChangelogTable from "../components/ChangelogTable";
+import {mapState} from "vuex";
 
 export default {
-  name: 'UploadBuild',
+  name: 'Upload',
   components: {ChangelogTable, ValidationAlert, Base},
   data() {
     return {
-      appName: null,
       errors: [],
       uploading: false,
       uploadPercentage: 0,
@@ -92,8 +92,15 @@ export default {
     }
   },
   created() {
-    this.axios.get('/api/v1/applications/' + this.$route.params.id).then((response) => {
-      this.appName = response.data.data.name;
+    if (_.isEmpty(this.$store.state.application.applications)) {
+      this.$store.dispatch('application/getApplicationById', this.$route.params.id).then(() =>
+          this.$store.dispatch('application/setCurrentAppById', this.$route.params.id)
+      );
+    }
+  },
+  computed: {
+    ...mapState({
+      app: state => state.application.currentApp ?? {'name': null},
     })
   },
   methods: {

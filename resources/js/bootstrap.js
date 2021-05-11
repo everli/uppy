@@ -6,7 +6,8 @@ import VueI18n from 'vue-i18n';
 import englishLocale from './lang/en.json';
 import Vue from "vue";
 import VueAxios from "vue-axios";
-import {applicationsModule} from "./store/applicationsModule";
+import {applicationModule} from "./store/applicationModule";
+import {buildModule} from "./store/buildModule";
 
 /**
  * Enable vue modules
@@ -55,7 +56,8 @@ export const store = new Vuex.Store({
         }
     },
     modules: {
-        applications: applicationsModule
+        application: applicationModule,
+        build: buildModule
     }
 })
 store.dispatch('setAuthState');
