@@ -86,15 +86,12 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .toggle-checkbox:checked {
-  @apply: right-0 border-primary-400;
-  right: 0;
-  border-color: #5A67D8;
+  @apply right-0 border-primary-400;
 }
 
 .toggle-checkbox:checked + .toggle-label {
-  @apply: bg-primary-400;
-  background-color: #5A67D8;
+  @apply bg-primary-400;
 }
 </style>

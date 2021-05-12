@@ -19,7 +19,7 @@
       </thead>
       <tbody v-for="(content, locale) in changelogs" class="text-gray-800">
       <tr class="border-t">
-        <td class="w-1/6 text-left">{{ locale }}</td>
+        <td class="w-1/6 text-left pt-3">{{ locale }}</td>
         <td class="w-auto prose max-w-full" v-html="markdown(content)"></td>
         <td class="w-1/6 text-right">
           <button type="button"

@@ -8,7 +8,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
         </a>
-        {{ app.name }}
+        {{ app.name }} - v{{ build.version }}
       </h3>
     </div>
 
@@ -47,7 +47,7 @@
 
           <div class="flex mt-6" v-if="!uploading">
             <button type="submit" :disabled="uploading" class="px-4 py-2 bg-primary-800 text-white rounded-md hover:bg-primary-600 focus:outline-none focus:bg-primary-700 disabled:opacity-75">
-              Upload
+              Update
             </button>
           </div>
 
@@ -80,6 +80,7 @@ export default {
   data() {
     return {
       build: {
+        version: null,
         available_from: null,
         forced: false,
       },
@@ -91,8 +92,8 @@ export default {
   },
   created() {
     if (_.isEmpty(this.$store.state.application.applications)) {
-      this.$store.dispatch('application/getApplicationById', this.$route.params.id).then(() =>
-          this.$store.dispatch('application/setCurrentAppById', this.$route.params.id)
+      this.$store.dispatch('application/getApplicationById', this.$route.params.application).then(() =>
+          this.$store.dispatch('application/setCurrentAppById', this.$route.params.application)
       );
     }
 
