@@ -28,7 +28,7 @@ class BuildUpdateRequest extends FormRequest
     {
         return [
             'file' => ['nullable', 'file', new SupportedMimeTypes()],
-            'available_from' => ['nullable', 'date', 'after_or_equal:now'],
+            'available_from' => ['nullable', 'date'],
             'forced' => [Rule::in(['on', 'off', true, false])],
             'changelogs.*' => ['nullable', 'string']
         ];
