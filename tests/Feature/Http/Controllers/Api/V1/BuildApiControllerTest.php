@@ -133,7 +133,7 @@ class BuildApiControllerTest extends TestCase
                             "The available from must be a date after or equal to now."
                         ],
                         "forced" => [
-                            "The selected forced is invalid."
+                            "The forced field must be true or false."
                         ],
                     ]
                 ]

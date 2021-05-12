@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Rules\SupportedMimeTypes;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class BuildUpdateRequest extends FormRequest
 {
@@ -25,7 +27,10 @@ class BuildUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'forced' => ['boolean'],
+            'file' => ['nullable', 'file', new SupportedMimeTypes()],
+            'available_from' => ['nullable', 'date', 'after_or_equal:now'],
+            'forced' => [Rule::in(['on', 'off', true, false])],
+            'changelogs.*' => ['nullable', 'string']
         ];
     }
 }

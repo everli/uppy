@@ -40,8 +40,11 @@ class BuildApiController extends Controller
      * @return ApiResource
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function create(BuildCreateRequest $request, Application $application, PlatformService $platforms): ApiResource
-    {
+    public function create(
+        BuildCreateRequest $request,
+        Application $application,
+        PlatformService $platforms
+    ): ApiResource {
         $platform = $platforms->guessFromFile($request->file('file'));
 
         $this->validate($request, ['version' => new NewVersion($application, $platform)]);
@@ -69,8 +72,7 @@ class BuildApiController extends Controller
      */
     public function update(BuildUpdateRequest $request, Build $build): ApiResource
     {
-        $build->fill($request->validated());
-        $build->save();
+        $this->builds->update($build, $request->validated());
 
         return new ApiResource($build);
     }

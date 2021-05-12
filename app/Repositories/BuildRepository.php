@@ -6,6 +6,7 @@ namespace App\Repositories;
 use App\Models\Application;
 use App\Models\Build;
 use App\Platforms\Platform;
+use App\Platforms\PlatformService;
 use Carbon\Carbon;
 use Composer\Semver\Comparator;
 use Exception;
@@ -29,37 +30,65 @@ class BuildRepository
      */
     public function create(Application $application, Platform $platform, array $attributes)
     {
-        /** @var UploadedFile $buildFile */
-        $buildFile = Arr::get($attributes, 'file');
-        $availableFrom = Carbon::parse(Arr::get($attributes, 'available_from'));
+        return DB::transaction(function () use ($attributes, $platform, $application) {
 
-        return DB::transaction(function () use ($availableFrom, $attributes, $platform, $application, $buildFile) {
-            $buildPath = $buildFile->storeAs(
-                $application->slug,
-                $application->slug.'-'.$platform->getId().'-'.Arr::get(
-                    $attributes,
-                    'version'
-                ).'.'.$buildFile->getClientOriginalExtension(),
-                ['disk' => config('filesystems.cloud')]
-            );
+            /** @var UploadedFile $artifact */
+            $artifact = Arr::get($attributes, 'file');
+            $availableFrom = Carbon::parse(Arr::get($attributes, 'available_from'));
+
+            $path = $this->storeArtifact($artifact, $application, $platform, Arr::get(
+                $attributes,
+                'version'
+            ));
 
             /** @var Build $build */
             $build = $application->builds()->create([
                 'platform' => $platform->getId(),
                 'version' => Arr::get($attributes, 'version'),
-                'file' => $buildPath,
+                'file' => $path,
                 'forced' => Arr::get($attributes, 'forced', 'false') === 'true',
                 'available_from' => $availableFrom->toDateTimeString(),
             ]);
 
-            foreach (Arr::get($attributes, 'changelogs', []) as $locale => $content) {
-                $build->changelogs()->create([
-                    'locale' => $locale,
-                    'content' => $content
-                ]);
-            }
+            $this->saveChangelogs($build, Arr::get($attributes, 'changelogs', []));
 
             return $build;
+        });
+    }
+
+    /**
+     * @param  Build  $build
+     * @param  array  $attributes
+     * @return mixed
+     */
+    public function update(Build $build, array $attributes)
+    {
+        return DB::transaction(function () use ($build, $attributes) {
+            $build->update($attributes);
+
+            $changelogs = Arr::get($attributes, 'changelogs');
+
+            // storing updated changelogs
+            if ($changelogs !== null) {
+                $build->changelogs()->delete();
+                $this->saveChangelogs($build, $changelogs);
+            }
+
+            /** @var UploadedFile $artifact */
+            $artifact = Arr::get($attributes, 'file');
+
+            // if the new file is specified, store it
+            if ($artifact !== null) {
+                Storage::cloud()->delete($build->file);
+
+                $this->storeArtifact(
+                    $artifact,
+                    $build->application,
+                    app(PlatformService::class)->get($build->platform),
+                    $build->version
+                );
+            }
+
         });
     }
 
@@ -170,5 +199,44 @@ class BuildRepository
     {
         Storage::cloud()->delete($build->file);
         return $build->delete();
+    }
+
+    /**
+     * @param  Build  $build
+     * @param  array  $changelogs
+     */
+    public function saveChangelogs(Build $build, array $changelogs): void
+    {
+        foreach ($changelogs as $locale => $content) {
+            $build->changelogs()->create([
+                'locale' => $locale,
+                'content' => $content
+            ]);
+        }
+    }
+
+    /**
+     * @param  UploadedFile  $buildFile
+     * @param  Application  $application
+     * @param  Platform  $platform
+     * @param  string  $version
+     * @return false|string
+     */
+    public function storeArtifact(
+        UploadedFile $buildFile,
+        Application $application,
+        Platform $platform,
+        string $version
+    ) {
+        return $buildFile->storeAs(
+            $application->slug,
+            sprintf("%s-%s-%s.%s",
+                $application->slug,
+                $platform->getId(),
+                $version,
+                $buildFile->getClientOriginalExtension()
+            ),
+            ['disk' => config('filesystems.cloud')]
+        );
     }
 }

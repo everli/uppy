@@ -187,7 +187,7 @@ class ApplicationApiControllerTest extends TestCase
     }
 
     /** @test */
-    public function it_return_application_index_paginated()
+    public function it_return_application_index()
     {
         Sanctum::actingAs(
             factory(User::class)->create(),
@@ -199,18 +199,16 @@ class ApplicationApiControllerTest extends TestCase
         $this->get(route('api.v1.applications.index'))
             ->assertOk()
             ->assertJsonFragment([
-                'data' => [
-                    [
-                        'id' => $application->id,
-                        'name' => $application->name,
-                        'slug' => $application->slug,
-                        'description' => $application->description,
-                        'icon' => $application->icon,
-                        'created_at' => $application->created_at->toDateTimeString(),
-                        'updated_at' => $application->updated_at->toDateTimeString(),
-                        'builds' => []
-                    ]
-                ],
+                [
+                    'id' => $application->id,
+                    'name' => $application->name,
+                    'slug' => $application->slug,
+                    'description' => $application->description,
+                    'icon' => $application->icon,
+                    'created_at' => $application->created_at->toDateTimeString(),
+                    'updated_at' => $application->updated_at->toDateTimeString(),
+                    'builds' => []
+                ]
             ]);
     }
 

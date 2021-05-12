@@ -13,7 +13,8 @@
     </div>
 
     <div class="mt-4">
-      <div class="border border-gray-400 bg-white rounded p-4 flex flex-col justify-between leading-normal shadow-sm hover:shadow-lg mr-2 mt-2">
+      <div
+          class="border border-gray-400 bg-white rounded p-4 flex flex-col justify-between leading-normal shadow-sm hover:shadow-lg mr-2 mt-2">
         <ValidationAlert :errors="errors"></ValidationAlert>
 
         <form @submit.prevent="uploadBuild" class="mt-2" id="upload-build">
@@ -29,7 +30,9 @@
             <label class="text-gray-700" for="forced">Forced update</label>
             <div class="mt-2">
               <label class="inline-flex items-center">
-                <input name="forced" id="forced" type="checkbox" class="form-checkbox text-primary-800 h-6 w-6" :checked="build.forced"/>
+                <input type="hidden" value="off" name="forced"/>
+                <input name="forced" id="forced" type="checkbox" class="form-checkbox text-primary-800 h-6 w-6"
+                       :checked="build.forced"/>
                 <span class="mx-2 text-gray-600 text-sm">This update is mandatory.</span>
               </label>
             </div>
@@ -46,7 +49,8 @@
           </div>
 
           <div class="flex mt-6" v-if="!uploading">
-            <button type="submit" :disabled="uploading" class="px-4 py-2 bg-primary-800 text-white rounded-md hover:bg-primary-600 focus:outline-none focus:bg-primary-700 disabled:opacity-75">
+            <button type="submit" :disabled="uploading"
+                    class="px-4 py-2 bg-primary-800 text-white rounded-md hover:bg-primary-600 focus:outline-none focus:bg-primary-700 disabled:opacity-75">
               Update
             </button>
           </div>
@@ -126,7 +130,7 @@ export default {
         form.append(`changelogs[${key}]`, value);
       }
 
-      this.axios.post('/api/v1/applications/' + this.$route.params.id + '/builds', form, {
+      this.axios.post(`/api/v1/builds/${this.build.id}`, form, {
         headers: {'Content-Type': 'multipart/form-data'},
 
         onUploadProgress: function (progressEvent) {

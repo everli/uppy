@@ -124,4 +124,12 @@ class Build extends Model
     {
         return $date->format('Y-m-d H:i:s');
     }
+
+    /**
+     * @param $value
+     */
+    public function setForcedAttribute($value): void
+    {
+        $this->attributes['forced'] = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    }
 }
