@@ -133,7 +133,7 @@ class BuildApiControllerTest extends TestCase
                             "The available from must be a date after or equal to now."
                         ],
                         "forced" => [
-                            "The forced field must be true or false."
+                            "The selected forced is invalid."
                         ],
                     ]
                 ]
@@ -271,6 +271,34 @@ class BuildApiControllerTest extends TestCase
             'locale' => 'it',
             'content' => 'Ciao',
         ]);
+    }
+
+    /**
+     * @test
+     */
+    public function it_returns_a_stored_build()
+    {
+        Sanctum::actingAs(
+            factory(User::class)->create(),
+            ['*']
+        );
+
+        // Create the application
+        $application = factory(Application::class)->create();
+
+        // Create the build
+        $build = factory(Build::class)->states('Android')->create([
+            'version' => '1.0.1',
+            'application_id' => $application->id,
+            'forced' => false,
+        ]);
+
+        $response = $this->get(route('api.v1.builds.show', ['build' => $build->id]));
+
+        $this->assertSame($build->id, $response->json('data.id'));
+        $this->assertSame($build->version, $response->json('data.version'));
+        $this->assertSame($build->forced, $response->json('data.forced'));
+        $this->assertSame($build->available_from->toDateTimeString(), $response->json('data.available_from'));
     }
 
     /**
