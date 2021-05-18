@@ -31,7 +31,7 @@ class BuildCreateRequest extends FormRequest
             'version' => ['required', new SemVer()],
             'file' => ['required', 'file', new SupportedMimeTypes()],
             'available_from' => ['nullable', 'date', 'after_or_equal:now'],
-            'forced' => [Rule::in(['true', 'false'])],
+            'forced' => [Rule::in(['on', 'off', true, false])],
             'changelogs.*' => ['nullable', 'string']
         ];
     }

@@ -19,11 +19,11 @@
       </thead>
       <tbody v-for="(content, locale) in changelogs" class="text-gray-800">
       <tr class="border-t">
-        <td class="w-1/6 text-left">{{ locale }}</td>
+        <td class="w-1/6 text-left pt-3">{{ locale }}</td>
         <td class="w-auto prose max-w-full" v-html="markdown(content)"></td>
         <td class="w-1/6 text-right">
           <button type="button"
-                  class="px-2 py-1 bg-gray-800 text-white rounded hover:bg-gray-600 focus:outline-none focus:bg-gray-700 inline-flex items-center uppercase"
+                  class="px-2 py-1 bg-orange-600 text-white rounded hover:bg-orange-400 focus:outline-none focus:bg-orange-500 inline-flex items-center uppercase"
                   @click="editChangelog(locale)">
             <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                  stroke="currentColor">
@@ -90,7 +90,7 @@
 </template>
 
 <script>
-import languages from '../config/languages.json'
+import languages from '../../config/languages.json'
 
 export default {
   name: "ChangelogTable",
