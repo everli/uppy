@@ -64,8 +64,6 @@ class BuildRepository
     public function update(Build $build, array $attributes)
     {
         return DB::transaction(function () use ($build, $attributes) {
-            $build->update($attributes);
-
             $changelogs = Arr::get($attributes, 'changelogs');
 
             // storing updated changelogs
@@ -81,14 +79,19 @@ class BuildRepository
             if ($artifact !== null) {
                 Storage::cloud()->delete($build->file);
 
-                $this->storeArtifact(
+                $path = $this->storeArtifact(
                     $artifact,
                     $build->application,
                     app(PlatformService::class)->get($build->platform),
                     $build->version
                 );
+
+                Arr::set($attributes, 'file', $path);
+            } else {
+                Arr::forget($attributes, 'file');
             }
 
+            $build->update($attributes);
         });
     }
 
