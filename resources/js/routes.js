@@ -3,10 +3,11 @@ import Home from './views/Home.vue';
 import ApplicationIndex from './views/applications/ApplicationIndex';
 import ApplicationCreate from './views/applications/ApplicationCreate';
 import ApplicationBuilds from './views/builds/ApplicationBuilds';
-import DownloadRedirect from './components/DownloadRedirect';
+import DownloadRedirect from './views/components/DownloadRedirect';
 import NotFound from './views/errors/NotFound';
-import UploadBuild from './views/builds/UploadBuild';
-import Download from "./components/Download";
+import Download from "./views/builds/Download";
+import Upload from "./views/builds/Upload";
+import Edit from "./views/builds/Edit";
 
 export const routes = [
     {
@@ -43,7 +44,7 @@ export const routes = [
     },
     {
         name: 'application.build.index',
-        path: '/applications/:slug/:id/builds',
+        path: '/applications/:application/builds',
         component: ApplicationBuilds,
         meta: {
             auth: true
@@ -51,8 +52,16 @@ export const routes = [
     },
     {
         name: 'application.build.upload',
-        path: '/applications/:slug/:id/builds/upload',
-        component: UploadBuild,
+        path: '/applications/:application/builds/upload',
+        component: Upload,
+        meta: {
+            auth: true
+        }
+    },
+    {
+        name: 'application.build.edit',
+        path: '/applications/:application/builds/:build/edit',
+        component: Edit,
         meta: {
             auth: true
         }

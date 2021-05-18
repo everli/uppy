@@ -8,34 +8,31 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
         </a>
-        {{ appName }}
+        {{ app.name }} - v{{ build.version }}
       </h3>
     </div>
 
     <div class="mt-4">
-      <div class="p-6 bg-white rounded-md shadow-md mb-2">
+      <div
+          class="border border-gray-400 bg-white rounded p-4 flex flex-col justify-between leading-normal shadow-sm hover:shadow-lg mr-2 mt-2">
         <ValidationAlert :errors="errors"></ValidationAlert>
 
         <form @submit.prevent="uploadBuild" class="mt-2" id="upload-build">
-          <div class="mt-4">
-            <label class="text-gray-700" for="version">Version</label>
-            <input id="version" name="version" class="form-input w-full mt-2 rounded-md focus:border-primary-600"
-                   type="text"/>
-          </div>
 
           <div class="mt-4">
             <label class="text-gray-700" for="available_from">Available from</label>
             <input id="available_from" name="available_from"
                    class="form-input w-full mt-2 rounded-md focus:border-primary-600" type="datetime-local"
-                   placeholder="YYYY-MM-DD HH:mm:ss"/>
+                   placeholder="YYYY-MM-DD HH:mm:ss" v-model="build.available_from"/>
           </div>
 
           <div class="mt-4">
             <label class="text-gray-700" for="forced">Forced update</label>
             <div class="mt-2">
               <label class="inline-flex items-center">
+                <input type="hidden" value="off" name="forced"/>
                 <input name="forced" id="forced" type="checkbox" class="form-checkbox text-primary-800 h-6 w-6"
-                       value="true"/>
+                       :checked="build.forced"/>
                 <span class="mx-2 text-gray-600 text-sm">This update is mandatory.</span>
               </label>
             </div>
@@ -52,8 +49,9 @@
           </div>
 
           <div class="flex mt-6" v-if="!uploading">
-            <button type="submit" :disabled="uploading" class="px-4 py-2 bg-primary-800 text-white rounded-md hover:bg-primary-600 focus:outline-none focus:bg-primary-700 disabled:opacity-75">
-              Upload
+            <button type="submit" :disabled="uploading"
+                    class="px-4 py-2 bg-primary-800 text-white rounded-md hover:bg-primary-600 focus:outline-none focus:bg-primary-700 disabled:opacity-75">
+              Update
             </button>
           </div>
 
@@ -76,15 +74,20 @@
 
 <script>
 import Base from '../layout/Base';
-import ValidationAlert from '../../components/ValidationAlert';
-import ChangelogTable from "../../components/ChangelogTable";
+import ValidationAlert from '../components/ValidationAlert';
+import ChangelogTable from "../components/ChangelogTable";
+import {mapState} from "vuex";
 
 export default {
-  name: 'UploadBuild',
+  name: 'Edit',
   components: {ChangelogTable, ValidationAlert, Base},
   data() {
     return {
-      appName: null,
+      build: {
+        version: null,
+        available_from: null,
+        forced: false,
+      },
       errors: [],
       uploading: false,
       uploadPercentage: 0,
@@ -92,20 +95,42 @@ export default {
     }
   },
   created() {
-    this.axios.get('/api/v1/applications/' + this.$route.params.id).then((response) => {
-      this.appName = response.data.data.name;
+    if (_.isEmpty(this.$store.state.application.applications)) {
+      this.$store.dispatch('application/getApplicationById', this.$route.params.application).then(() =>
+          this.$store.dispatch('application/setCurrentAppById', this.$route.params.application)
+      );
+    }
+
+    axios.get(`/api/v1/builds/${this.$route.params.build}`).then(response => {
+      const build = response.data.data;
+
+      const availableForm = new Date(build.available_from);
+      availableForm.setMinutes(availableForm.getMinutes() - availableForm.getTimezoneOffset());
+      build.available_from = availableForm.toISOString().slice(0, 16);
+
+      this.build = build;
+      Object.values(build.changelogs).forEach(changelog => {
+        this.$set(this.changelogs, changelog.locale, changelog.content);
+      });
+    });
+
+  },
+  computed: {
+    ...mapState({
+      app: state => state.application.currentApp ?? {'name': null},
     })
   },
   methods: {
     uploadBuild() {
       this.uploading = true;
+      this.errors = [];
       let form = new FormData(document.getElementById('upload-build'));
 
       for (const [key, value] of Object.entries(this.changelogs)) {
         form.append(`changelogs[${key}]`, value);
       }
 
-      this.axios.post('/api/v1/applications/' + this.$route.params.id + '/builds', form, {
+      this.axios.post(`/api/v1/builds/${this.build.id}`, form, {
         headers: {'Content-Type': 'multipart/form-data'},
 
         onUploadProgress: function (progressEvent) {
@@ -115,7 +140,7 @@ export default {
       }).then(() => {
         this.$router.push({
           name: 'application.build.index',
-          params: {slug: this.$route.params.slug, id: this.$route.params.id}
+          params: {application: this.$route.params.application}
         });
       }).catch(e => {
 
