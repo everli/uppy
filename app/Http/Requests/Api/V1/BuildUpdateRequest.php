@@ -30,6 +30,8 @@ class BuildUpdateRequest extends FormRequest
             'file' => ['nullable', 'file', new SupportedMimeTypes()],
             'available_from' => ['nullable', 'date'],
             'forced' => [Rule::in(['on', 'off', true, false])],
+            'partial_rollout' => ['nullable', Rule::in(['on', 'off', true, false])],
+            'rollout_percentage' => ['nullable', 'integer'],
             'changelogs.*' => ['nullable', 'string']
         ];
     }

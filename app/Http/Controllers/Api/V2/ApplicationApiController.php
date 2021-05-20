@@ -18,9 +18,9 @@ class ApplicationApiController extends Controller
 {
 
     /**
-     * @param UpdateRequest $request
-     * @param Application $application
-     * @param Platform $platform
+     * @param  UpdateRequest  $request
+     * @param  Application  $application
+     * @param  Platform  $platform
      * @return ApplicationUpdateResource|\Illuminate\Http\JsonResponse
      * @throws ApiException
      */
@@ -28,10 +28,18 @@ class ApplicationApiController extends Controller
     {
         $newBuild = $this->builds->getUpdate($application, $platform, $request->get('version'));
         $currentBuild = $this->builds->getByVersion($application, $platform, $request->get('version'));
+        $deviceId = $request->get('device_id');
 
-        event(new UpdateCheck($request->get('device_id'), $application, $currentBuild));
+        event(new UpdateCheck($deviceId, $application, $currentBuild));
 
-        if ($newBuild === null) {
+        if (
+            $newBuild === null ||
+            (
+                $newBuild->partial_rollout &&
+                $deviceId !== null &&
+                !$this->builds->isDeviceInRolloutRange($newBuild, $deviceId)
+            )
+        ) {
             return response()->json([
                 'message' => 'No available update.',
             ], Response::HTTP_NOT_FOUND);

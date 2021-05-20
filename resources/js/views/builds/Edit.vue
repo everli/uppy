@@ -39,6 +39,28 @@
           </div>
 
           <div class="mt-4">
+            <label class="text-gray-700" for="partial_rollout">Partial Rollout</label>
+            <div class="mt-2">
+              <label class="inline-flex items-center">
+                <input type="hidden" value="off" name="partial_rollout"/>
+                <input name="partial_rollout" id="partial_rollout" type="checkbox"
+                       class="form-checkbox text-primary-800 h-6 w-6" v-model="build.partial_rollout"/>
+                <span class="mx-2 text-gray-600 text-sm">Enable partial rollout.</span>
+              </label>
+            </div>
+            <div v-if="build.partial_rollout" class="mt-2 inline-flex items-center w-full">
+              <span class="mr-2 input-percentage">
+                <input type="number" class="form-input" min="0" max="100" step="10" v-model="build.rollout_percentage">
+              </span>
+              <div class="flex-grow">
+                <input type="range" id="rollout_percentage" name="rollout_percentage" min="0" max="100" step="10"
+                       class="rounded-lg overflow-hidden appearance-none bg-gray-400 h-4 w-full flex-grow"
+                       v-model="build.rollout_percentage">
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4">
             <label class="text-gray-700" for="file">File</label>
             <input id="file" name="file" class="w-full mt-2" type="file"/>
           </div>

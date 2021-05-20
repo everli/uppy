@@ -300,7 +300,7 @@ class BuildRepositoryTest extends TestCase
         $platform = new AndroidPlatform();
 
         $builds = app()->make(BuildRepository::class);
-        $update = $builds->getLast($application, $platform);
+        $update = $builds->getLastBuild($application, $platform);
 
         $this->assertNull($update);
     }
@@ -323,7 +323,7 @@ class BuildRepositoryTest extends TestCase
         ]);
 
         $builds = app()->make(BuildRepository::class);
-        $update = $builds->getLast($application, $platform);
+        $update = $builds->getLastBuild($application, $platform);
 
         $this->assertNull($update);
     }
@@ -346,7 +346,7 @@ class BuildRepositoryTest extends TestCase
         ]);
 
         $builds = app()->make(BuildRepository::class);
-        $update = $builds->getLast($application, $platform);
+        $update = $builds->getLastBuild($application, $platform);
 
         $this->assertInstanceOf(Build::class, $update);
         $this->assertEquals('1.0.0', $update->version);

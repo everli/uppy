@@ -5,6 +5,7 @@ namespace App\Repositories;
 
 use App\Models\Application;
 use App\Models\Build;
+use App\Models\Device;
 use App\Platforms\Platform;
 use App\Platforms\PlatformService;
 use Carbon\Carbon;
@@ -46,8 +47,10 @@ class BuildRepository
                 'platform' => $platform->getId(),
                 'version' => Arr::get($attributes, 'version'),
                 'file' => $path,
-                'forced' => Arr::get($attributes, 'forced', 'false') === 'true',
+                'forced' => Arr::get($attributes, 'forced', false),
                 'available_from' => $availableFrom->toDateTimeString(),
+                'partial_rollout' => Arr::get($attributes, 'partial_rollout', false),
+                'rollout_percentage' => Arr::get($attributes, 'rollout_percentage', 0),
             ]);
 
             $this->saveChangelogs($build, Arr::get($attributes, 'changelogs', []));
@@ -152,7 +155,7 @@ class BuildRepository
      *
      * @return Build|\Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Relations\HasMany|object|null
      */
-    public function getLast(Application $application, Platform $platform)
+    public function getLastBuild(Application $application, Platform $platform)
     {
         return $application->builds()->where('platform', $platform->getId())
             ->where('available_from', '<=', Carbon::now())
@@ -241,5 +244,33 @@ class BuildRepository
             ),
             ['disk' => config('filesystems.cloud')]
         );
+    }
+
+    /**
+     * @param  Build  $build
+     * @param  string  $deviceId
+     * @return bool
+     */
+    public function isDeviceInRolloutRange(Build $build, string $deviceId): bool
+    {
+        $activeDevices = Device::query()
+            ->where('updated_at', '>', now()->subMonth()->toDateTimeString())
+            ->where('application_id', $build->application_id)
+            ->orderBy('device_id');
+
+        $deviceCount = $activeDevices->count();
+        $devicePercentage = ($build->rollout_percentage / 100) * $deviceCount;
+
+        $firstInRange = $activeDevices->first();
+        $lastInRange = $activeDevices->offset($devicePercentage - 1)->first();
+
+        if ($firstInRange === null || $lastInRange === null) {
+            return false;
+        }
+
+        return $activeDevices
+            ->whereBetween('device_id', [$firstInRange->device_id, $lastInRange->device_id])
+            ->where('device_id', $deviceId)
+            ->exists();
     }
 }

@@ -32,6 +32,8 @@ class BuildCreateRequest extends FormRequest
             'file' => ['required', 'file', new SupportedMimeTypes()],
             'available_from' => ['nullable', 'date', 'after_or_equal:now'],
             'forced' => [Rule::in(['on', 'off', true, false])],
+            'partial_rollout' => ['nullable', Rule::in(['on', 'off', true, false])],
+            'rollout_percentage' => ['nullable', 'integer'],
             'changelogs.*' => ['nullable', 'string']
         ];
     }
