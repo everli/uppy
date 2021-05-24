@@ -26,20 +26,29 @@ class ApplicationApiController extends Controller
      */
     public function updates(UpdateRequest $request, Application $application, Platform $platform)
     {
-        $newBuild = $this->builds->getUpdate($application, $platform, $request->get('version'));
         $currentBuild = $this->builds->getByVersion($application, $platform, $request->get('version'));
         $deviceId = $request->get('device_id');
+        $before = now();
 
         event(new UpdateCheck($deviceId, $application, $currentBuild));
 
-        if (
-            $newBuild === null ||
-            (
+        do {
+            $newBuild = $this->builds->getUpdate($application, $platform, $request->get('version'), $before);
+            $buildFound = true;
+
+            if (
+                $newBuild !== null &&
                 $newBuild->partial_rollout &&
                 $deviceId !== null &&
                 !$this->builds->isDeviceInRolloutRange($newBuild, $deviceId)
-            )
-        ) {
+            ) {
+                $before = $newBuild->available_from;
+                $buildFound = false;
+            }
+
+        } while (!$buildFound);
+
+        if ($newBuild === null) {
             return response()->json([
                 'message' => 'No available update.',
             ], Response::HTTP_NOT_FOUND);

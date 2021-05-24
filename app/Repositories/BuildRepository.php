@@ -104,16 +104,20 @@ class BuildRepository
      * @param  Application  $application
      * @param  Platform  $platform
      * @param  string  $version
-     *
+     * @param  Carbon|null  $before
      * @return Build
      */
-    public function getUpdate(Application $application, Platform $platform, string $version): ?Build
-    {
+    public function getUpdate(
+        Application $application,
+        Platform $platform,
+        string $version,
+        ?Carbon $before = null
+    ): ?Build {
         // get the installed version for the platform.
         $installedVersion = $this->getByVersion($application, $platform, $version);
 
         $lastAvailableBuilds = $application->builds()->where('platform', $platform->getId())
-            ->where('available_from', '<=', Carbon::now())
+            ->where('available_from', '<', $before ?? now())
             ->when($installedVersion, function (Builder $query) use ($installedVersion) {
                 // if the installed version is on DB we get all the next versions.
                 $query->where('id', '>', $installedVersion->id);
@@ -262,7 +266,9 @@ class BuildRepository
         $devicePercentage = ($build->rollout_percentage / 100) * $deviceCount;
 
         $firstInRange = $activeDevices->first();
-        $lastInRange = $activeDevices->offset($devicePercentage - 1)->first();
+        $lastInRange = (clone $activeDevices)
+            ->offset($devicePercentage - 1)
+            ->first();
 
         if ($firstInRange === null || $lastInRange === null) {
             return false;

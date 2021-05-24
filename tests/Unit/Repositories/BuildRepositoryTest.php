@@ -206,6 +206,8 @@ class BuildRepositoryTest extends TestCase
             'application_id' => $application->id,
         ]);
 
+        Carbon::setTestNow(now()->addDay());
+
         $builds = app()->make(BuildRepository::class);
         $update = $builds->getUpdate($application, $platform, '1.0.0');
 
@@ -246,6 +248,8 @@ class BuildRepositoryTest extends TestCase
             'created_at' => Carbon::now(),
         ]);
 
+        Carbon::setTestNow(now()->addDay());
+
         $builds = app()->make(BuildRepository::class);
         $update = $builds->getUpdate($application, $platform, '7.5.2');
 
@@ -279,6 +283,8 @@ class BuildRepositoryTest extends TestCase
             'forced' => false,
             'created_at' => Carbon::now(),
         ]);
+
+        Carbon::setTestNow(now()->addDay());
 
         $builds = app()->make(BuildRepository::class);
         $update = $builds->getUpdate($application, $platform, '7.5.2');
