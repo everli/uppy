@@ -257,8 +257,12 @@ class BuildRepository
      */
     public function isDeviceInRolloutRange(Build $build, string $deviceId): bool
     {
+        $threshold = now()
+            ->subDays(config('uppy.active_device_threshold'))
+            ->toDateTimeString();
+
         $activeDevices = Device::query()
-            ->where('updated_at', '>', now()->subMonth()->toDateTimeString())
+            ->where('updated_at', '>', $threshold)
             ->where('application_id', $build->application_id)
             ->orderBy('device_id');
 
