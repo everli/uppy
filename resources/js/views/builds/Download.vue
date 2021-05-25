@@ -13,13 +13,18 @@
           <p class="w-full text-gray-600 font-semibold text-xs tracking-widest font-light" v-text="app.date"></p>
         </div>
       </div>
-      <a role="button" :href="app.download_url"
+      <a role="button" :href="app.download_url" @click="onDownloadStart"
+         :class="{'opacity-50 pointer-events-none': downloading}"
          class="py-3 flex w-full rounded bg-primary-800 text-white hover:bg-primary-800 transition-none">
         <div class="flex mx-auto">
-          <svg class="w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+          <svg v-if="!downloading" class="w-6 h-6 -ml-1 mr-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+          <svg v-if="downloading" class="animate-spin -ml-1 mr-3 h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
           <span class="uppercase">download</span>
         </div>
@@ -45,6 +50,7 @@ export default {
     return {
       app: {},
       changelog: null,
+      downloading: false,
     }
   },
   created() {
@@ -65,9 +71,13 @@ export default {
         });
   },
   methods: {
-    markdown: (value) => {
+    markdown(value) {
       return value ? marked(value) : value
-    }
+    },
+    onDownloadStart() {
+      this.downloading = true;
+      setTimeout(() => this.downloading = false, 10000);
+    },
   }
 }
 </script>
