@@ -16,7 +16,14 @@ class Boolean implements Rule
      */
     public function passes($attribute, $value)
     {
-        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+        return in_array($value, [
+            true,
+            false,
+            'true',
+            'false',
+            'on',
+            'off'
+        ], true);
     }
 
     /**
