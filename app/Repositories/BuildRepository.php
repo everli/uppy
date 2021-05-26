@@ -46,7 +46,7 @@ class BuildRepository
                 'platform' => $platform->getId(),
                 'version' => Arr::get($attributes, 'version'),
                 'file' => $path,
-                'forced' => Arr::get($attributes, 'forced', 'false') === 'true',
+                'forced' => Arr::get($attributes, 'forced', false),
                 'available_from' => $availableFrom->toDateTimeString(),
             ]);
 

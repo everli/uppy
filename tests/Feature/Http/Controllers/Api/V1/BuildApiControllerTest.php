@@ -387,4 +387,43 @@ class BuildApiControllerTest extends TestCase
 
         $this->assertDatabaseMissing('builds', ['id' => $build->id]);
     }
+
+    /**
+     * @test
+     * @dataProvider providesForcedFlags
+     */
+    public function create_accepts_different_forced_flags($forcedFlag): void
+    {
+        Sanctum::actingAs(
+            factory(User::class)->create(),
+            ['*']
+        );
+
+        // Create the application
+        $application = factory(Application::class)->create();
+
+        // Get the response
+        $response = $this->post(route('api.v1.builds.create', ['application' => $application->id]), [
+            'version' => '1.0.0',
+            'file' => UploadedFile::fake()->create('a-new-build.apk'),
+            'forced' => $forcedFlag
+        ]);
+
+        $response->assertCreated();
+        $this->assertSame(filter_var($forcedFlag, FILTER_VALIDATE_BOOLEAN), $response->json('data.forced'));
+    }
+
+    /**
+     * @return \Generator
+     */
+    public function providesForcedFlags(): \Generator
+    {
+        yield [true];
+        yield [false];
+        yield ['true'];
+        yield ['false'];
+        yield ['on'];
+        yield ['off'];
+    }
+
 }
