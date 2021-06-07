@@ -257,27 +257,42 @@ class BuildRepository
      */
     public function isDeviceInRolloutRange(Build $build, string $deviceId): bool
     {
+        // only devices that contacted the backend
+        // after this date are considered active
         $threshold = now()
             ->subDays(config('uppy.active_device_threshold'))
             ->toDateTimeString();
 
+        // get all the active users for this application
         $activeDevices = Device::query()
             ->where('updated_at', '>', $threshold)
             ->where('application_id', $build->application_id)
             ->orderBy('device_id');
 
+        // calculate how many devices should get the update notification
+        // according to the rollout percentage
         $deviceCount = $activeDevices->count();
-        $devicePercentage = ($build->rollout_percentage / 100) * $deviceCount;
+        $devicesInRange = ($build->rollout_percentage / 100) * $deviceCount;
 
+        // define a range:
+        // the first device in range is the first by device_id
+        // the last device instead is the last one counting n devices
+        // in the range
         $firstInRange = $activeDevices->first();
+
+        // using the same query, filtering the devices and sorting by device id,
+        // we find the last device according to the rollout percentage
         $lastInRange = (clone $activeDevices)
-            ->offset($devicePercentage - 1)
+            ->offset($devicesInRange - 1)
             ->first();
 
         if ($firstInRange === null || $lastInRange === null) {
             return false;
         }
 
+        // select all devices between the first one and the last one (so the full
+        // partial rollout range), if in that range the current device_id is included,
+        // it can receive the update
         return $activeDevices
             ->whereBetween('device_id', [$firstInRange->device_id, $lastInRange->device_id])
             ->where('device_id', $deviceId)
