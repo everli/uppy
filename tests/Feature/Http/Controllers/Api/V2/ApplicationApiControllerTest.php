@@ -158,7 +158,7 @@ class ApplicationApiControllerTest extends TestCase
     /**
      * @test
      */
-    public function it_return_the_update_when_device_id_is_in_partial_rollout_range(): void
+    public function it_returns_the_update_when_device_id_is_in_partial_rollout_range(): void
     {
         // Create the application
         $application = $this->makeApplicationModel();
