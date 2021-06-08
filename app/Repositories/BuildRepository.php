@@ -274,6 +274,11 @@ class BuildRepository
         $deviceCount = $activeDevices->count();
         $devicesInRange = ($build->rollout_percentage / 100) * $deviceCount;
 
+        // if there are no device range to be considered, return false
+        if ($devicesInRange === 0) {
+            return false;
+        }
+
         // define a range:
         // the first device in range is the first by device_id
         // the last device instead is the last one counting n devices

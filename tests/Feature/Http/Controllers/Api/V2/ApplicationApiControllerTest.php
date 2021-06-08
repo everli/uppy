@@ -241,4 +241,43 @@ class ApplicationApiControllerTest extends TestCase
         $this->assertNotSame($build2->version, $response->json('data.version'));
     }
 
+    /**
+     * @test
+     */
+    public function it_return_no_available_update_if_not_in_partial_rollout_range(): void
+    {
+        // Create the application
+        $application = $this->makeApplicationModel();
+
+        // Select the platform
+        $platform = new AndroidPlatform();
+
+        $build0 = $this->makeBuildModel($application->id, $platform->getId(), [
+            'version' => '1.0.0',
+            'available_from' => Carbon::today()->subMonth(),
+        ]);
+
+        $build1 = $this->makeBuildModel($application->id, $platform->getId(), [
+            'version' => '2.0.0',
+            'available_from' => Carbon::today()->subDay(),
+            'partial_rollout' => true,
+            'rollout_percentage' => 0, // this update is not available to anyone
+        ]);
+
+        $device = factory(Device::class)->create([
+            'build_id' => $build0->id,
+            'application_id' => $application->id,
+        ]);
+
+        $response = $this->post(route('api.v2.updates.get', [
+            'application' => $application->slug,
+            'platform' => $platform->getId(),
+        ]), [
+            'version' => $build0->version,
+            'device_id' => $device->device_id
+        ]);
+
+        $response->assertJsonFragment(['message' => 'No available update.']);
+    }
+
 }
