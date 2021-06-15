@@ -43,4 +43,6 @@ return [
 
     'default_platform' => \App\Platforms\AndroidPlatform::class,
 
+    'active_device_threshold' => env('ACTIVE_DEVICE_THRESHOLD', 30), // days
+
 ];

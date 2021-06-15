@@ -30,7 +30,7 @@ class ApplicationController extends Controller
      */
     public function platformRedirect(Application $application, Agent $agent, PlatformService $platforms)
     {
-        $build = $this->builds->getLast($application, $platforms->matchFromAgent($agent));
+        $build = $this->builds->getLastBuild($application, $platforms->matchFromAgent($agent));
 
         if ($build === null) {
             abort(Response::HTTP_NOT_FOUND);
@@ -51,7 +51,7 @@ class ApplicationController extends Controller
      */
     public function install(Request $request, Application $application, Platform $platform, Cloud $storage): RedirectResponse
     {
-        $build = $this->builds->getLast($application, $platform);
+        $build = $this->builds->getLastBuild($application, $platform);
 
         if (!$storage->exists($build->file)) {
             abort(Response::HTTP_NOT_FOUND);
@@ -90,7 +90,7 @@ class ApplicationController extends Controller
      */
     public function plist(Application $application, Platform $platform, Cloud $storage): Response
     {
-        $build = $this->builds->getLast($application, $platform);
+        $build = $this->builds->getLastBuild($application, $platform);
 
         return response()->view('templates.plist', [
             'fileUrl' => $platform->getFileUrl($build, $storage),

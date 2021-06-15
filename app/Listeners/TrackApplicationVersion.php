@@ -12,7 +12,7 @@ class TrackApplicationVersion
     /**
      * Handle the event.
      *
-     * @param UpdateCheck $event
+     * @param  UpdateCheck  $event
      * @return void
      */
     public function handle(UpdateCheck $event)
@@ -21,12 +21,12 @@ class TrackApplicationVersion
             return;
         }
 
-        /** @var Device $device */
-        Device::updateOrCreate([
-            'application_id' => $event->application->id,
-            'device_id' => $event->deviceId
-        ], [
-            'build_id' => $event->currentBuild->id
-        ]);
+        Device::query()
+            ->updateOrCreate([
+                'application_id' => $event->application->id,
+                'device_id' => $event->deviceId,
+            ], [
+                'build_id' => $event->currentBuild->id
+            ])->touch();
     }
 }
