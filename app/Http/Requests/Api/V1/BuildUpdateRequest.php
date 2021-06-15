@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Rules\Boolean;
 use App\Rules\SupportedMimeTypes;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class BuildUpdateRequest extends FormRequest
 {
@@ -29,8 +29,8 @@ class BuildUpdateRequest extends FormRequest
         return [
             'file' => ['nullable', 'file', new SupportedMimeTypes()],
             'available_from' => ['nullable', 'date'],
-            'forced' => [Rule::in(['on', 'off', true, false])],
-            'partial_rollout' => ['nullable', Rule::in(['on', 'off', true, false])],
+            'forced' => ['nullable', new Boolean()],
+            'partial_rollout' => ['nullable', new Boolean()],
             'rollout_percentage' => ['nullable', 'integer'],
             'changelogs.*' => ['nullable', 'string']
         ];

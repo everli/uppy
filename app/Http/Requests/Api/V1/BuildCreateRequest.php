@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Rules\Boolean;
 use App\Rules\SemVer;
 use App\Rules\SupportedMimeTypes;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class BuildCreateRequest extends FormRequest
 {
@@ -31,8 +31,8 @@ class BuildCreateRequest extends FormRequest
             'version' => ['required', new SemVer()],
             'file' => ['required', 'file', new SupportedMimeTypes()],
             'available_from' => ['nullable', 'date', 'after_or_equal:now'],
-            'forced' => [Rule::in(['on', 'off', true, false])],
-            'partial_rollout' => ['nullable', Rule::in(['on', 'off', true, false])],
+            'forced' => ['nullable', new Boolean()],
+            'partial_rollout' => ['nullable', new Boolean()],
             'rollout_percentage' => ['nullable', 'integer'],
             'changelogs.*' => ['nullable', 'string']
         ];
