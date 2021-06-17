@@ -96,7 +96,7 @@ class BuildApiController extends Controller
      */
     public function latest(Application $application, Platform $platform): DownloadResource
     {
-        $build = $this->builds->getLast($application, $platform);
+        $build = $this->builds->getLastBuild($application, $platform);
         return new DownloadResource($build);
     }
 }

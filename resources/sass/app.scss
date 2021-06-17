@@ -10,3 +10,29 @@
 
 // Variables
 @import 'variables';
+
+
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  input[type="range"]::-webkit-slider-thumb {
+    width: 1.2rem;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 1.2rem;
+    cursor: ew-resize;
+    @apply bg-gray-100;
+    box-shadow: -1005px 0 0 1000px theme('colors.primary.800');
+    border-radius: 50%;
+  }
+}
+
+span.input-percentage {
+  display: inline-block;
+  position: relative;
+}
+
+span.input-percentage::after {
+  content: '%';
+  position: absolute;
+  right: 2rem;
+  top: .55rem;
+}
