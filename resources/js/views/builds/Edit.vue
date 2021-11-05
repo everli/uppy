@@ -27,13 +27,13 @@
           </div>
 
           <div class="mt-4">
-            <label class="text-gray-700" for="forced">Forced update</label>
+            <label class="text-gray-700" for="dismissed">Dismiss release</label>
             <div class="mt-2">
               <label class="inline-flex items-center">
-                <input type="hidden" value="off" name="forced"/>
-                <input name="forced" id="forced" type="checkbox" class="form-checkbox text-primary-800 h-6 w-6"
-                       :checked="build.forced"/>
-                <span class="mx-2 text-gray-600 text-sm">This update is mandatory.</span>
+                <input type="hidden" value="off" name="dismissed"/>
+                <input name="dismissed" id="dismissed" type="checkbox" class="form-checkbox text-primary-800 h-6 w-6"
+                       :checked="build.dismissed"/>
+                <span class="mx-2 text-gray-600 text-sm">Set this build as deprecated.</span>
               </label>
             </div>
           </div>
@@ -108,7 +108,7 @@ export default {
       build: {
         version: null,
         available_from: null,
-        forced: false,
+        dismissed: false,
       },
       errors: [],
       uploading: false,

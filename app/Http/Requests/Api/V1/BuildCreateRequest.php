@@ -31,7 +31,7 @@ class BuildCreateRequest extends FormRequest
             'version' => ['required', new SemVer()],
             'file' => ['required', 'file', new SupportedMimeTypes()],
             'available_from' => ['nullable', 'date', 'after_or_equal:now'],
-            'forced' => ['nullable', new Boolean()],
+            'dismissed' => ['nullable', new Boolean()],
             'partial_rollout' => ['nullable', new Boolean()],
             'rollout_percentage' => ['nullable', 'integer'],
             'changelogs.*' => ['nullable', 'string']

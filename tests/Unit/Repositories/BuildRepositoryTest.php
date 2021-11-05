@@ -56,7 +56,7 @@ class BuildRepositoryTest extends TestCase
             'platform' => $platform->getId(),
             'version' => $version,
             'file' => $buildPath,
-            'forced' => false,
+            'dismissed' => false,
             'available_from' => $build->available_from,
         ]);
     }
@@ -85,7 +85,7 @@ class BuildRepositoryTest extends TestCase
             'platform' => $platform->getId(),
             'version' => $version,
             'file' => $buildFile,
-            'forced' => 'true',
+            'dismissed' => 'true',
             'available_from' => $now->copy()->addDay()->toDateTimeString(),
         ];
 
@@ -100,7 +100,7 @@ class BuildRepositoryTest extends TestCase
             'platform' => $platform->getId(),
             'version' => $version,
             'file' => $buildPath,
-            'forced' => true,
+            'dismissed' => true,
             'available_from' => $build->available_from,
         ]);
     }
@@ -230,21 +230,21 @@ class BuildRepositoryTest extends TestCase
         factory(Build::class)->states(['Android'])->create([
             'version' => '7.5.2',
             'application_id' => $application->id,
-            'forced' => false,
+            'dismissed' => false,
             'created_at' => Carbon::now()->subMonth(),
         ]);
 
         factory(Build::class)->states(['Android'])->create([
             'version' => '7.5.3',
             'application_id' => $application->id,
-            'forced' => true,
+            'dismissed' => true,
             'created_at' => Carbon::now()->subDay(),
         ]);
 
         factory(Build::class)->states(['Android'])->create([
             'version' => '7.5.4',
             'application_id' => $application->id,
-            'forced' => false,
+            'dismissed' => false,
             'created_at' => Carbon::now(),
         ]);
 
@@ -255,7 +255,7 @@ class BuildRepositoryTest extends TestCase
 
         $this->assertInstanceOf(Build::class, $update);
         $this->assertEquals('7.5.4', $update->version);
-        $this->assertEquals(true, $update->forced);
+        $this->assertEquals(true, $update->dismissed);
     }
 
     /**
@@ -273,14 +273,14 @@ class BuildRepositoryTest extends TestCase
         factory(Build::class)->states(['Android'])->create([
             'version' => '7.5.3',
             'application_id' => $application->id,
-            'forced' => false,
+            'dismissed' => false,
             'created_at' => Carbon::now()->subDay(),
         ]);
 
         factory(Build::class)->states(['Android'])->create([
             'version' => '7.5.4',
             'application_id' => $application->id,
-            'forced' => false,
+            'dismissed' => false,
             'created_at' => Carbon::now(),
         ]);
 
@@ -291,7 +291,7 @@ class BuildRepositoryTest extends TestCase
 
         $this->assertInstanceOf(Build::class, $update);
         $this->assertEquals('7.5.4', $update->version);
-        $this->assertEquals(false, $update->forced);
+        $this->assertEquals(false, $update->dismissed);
     }
 
     /**

@@ -18,8 +18,8 @@ $factory->define(Build::class, function (Faker $faker) {
         'application_id' => factory(Application::class),
         'platform' => resolve($faker->randomElement(app('platform')->getSupportedPlatforms()))->getId(),
         'version' => '0.0.1',
-        'file' => $faker->slug . '/' . Str::random() . '.' . $faker->fileExtension,
-        'forced' => false,
+        'file' => $faker->slug.'/'.Str::random().'.'.$faker->fileExtension,
+        'dismissed' => false,
         'available_from' => Carbon::now(),
     ];
 });
@@ -51,8 +51,8 @@ $factory->state(Build::class, 'postponed', function (Faker $faker) {
     ];
 });
 
-$factory->state(Build::class, 'forced', function (Faker $faker) {
+$factory->state(Build::class, 'dismissed', function (Faker $faker) {
     return [
-        'forced' => true,
+        'dismissed' => true,
     ];
 });

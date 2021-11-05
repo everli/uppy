@@ -60,7 +60,8 @@ class ApplicationApiController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
 
-        return new ApplicationUpdateResource($newBuild);
+        return ApplicationUpdateResource::make($newBuild)
+            ->additional(['forced' => optional($currentBuild)->dismissed ?? false]);
     }
 
 }
