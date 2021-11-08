@@ -484,4 +484,37 @@ class BuildRepositoryTest extends TestCase
             'content' => 'Ciao',
         ]);
     }
+
+    /**
+     * @test
+     */
+    public function it_return_the_last_undismissed_build()
+    {
+        // Create the application
+        $application = factory(Application::class)->create();
+
+        // Select the platform
+        $platform = new AndroidPlatform();
+
+        // Create the builds
+        factory(Build::class)->states(['Android'])->create([
+            'version' => '1.0.1',
+            'application_id' => $application->id,
+            'dismissed' => false
+        ]);
+
+        factory(Build::class)->states(['Android'])->create([
+            'version' => '1.0.2',
+            'application_id' => $application->id,
+            'dismissed' => true,
+        ]);
+
+        Carbon::setTestNow(now()->addDay());
+
+        $builds = app()->make(BuildRepository::class);
+        $update = $builds->getUpdate($application, $platform, '1.0.0');
+
+        $this->assertInstanceOf(Build::class, $update);
+        $this->assertEquals('1.0.1', $update->version);
+    }
 }

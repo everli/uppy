@@ -118,6 +118,7 @@ class BuildRepository
         $lastAvailableBuild = $application->builds()
             ->where('platform', $platform->getId())
             ->where('available_from', '<', $before ?? now())
+            ->where('dismissed', false)
             ->latest('available_from')
             ->first();
 
