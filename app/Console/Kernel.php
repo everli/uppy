@@ -26,7 +26,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command(AutoDismissBuildsCommand::class)
-            ->dailyAt('00:00:00');
+            ->dailyAt('00:00');
     }
 
     /**

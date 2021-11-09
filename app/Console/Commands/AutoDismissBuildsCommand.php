@@ -13,14 +13,14 @@ class AutoDismissBuildsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'builds:dismiss';
+    protected $signature = 'build:auto-dismiss';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Automatically set builds as dismissed';
 
     /**
      * Create a new command instance.
@@ -49,7 +49,7 @@ class AutoDismissBuildsCommand extends Command
         $interval = Carbon::now()->subDays($dismissAfter);
 
         Build::query()
-            ->where('available_at', '<', $interval->toDateTimeString())
+            ->where('available_from', '<', $interval->toDateTimeString())
             ->update(['dismissed' => true]);
 
         return 0;
