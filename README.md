@@ -33,8 +33,10 @@ In order to see the dashboard, you need to compile le frontend assets:
 ```shell script
 docker-compose run --rm node npm install
 
-docker-compose run --rm node npm run dev # development assets
-docker-compose run --rm node npm run prod # production assets
+cp tailwind.config.js.example tailwind.config.js
+
+docker-compose run --rm node npm run development # development assets
+docker-compose run --rm node npm run production # production assets
 ```
 
 If you are developing on the frontend, is useful to run a watch command, to automatically compile assets on file chages:
