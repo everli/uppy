@@ -280,4 +280,55 @@ class ApplicationApiControllerTest extends TestCase
         $response->assertJsonFragment(['message' => 'No available update.']);
     }
 
+    /**
+     * @test
+     * @throws \Exception
+     */
+    public function forced_is_true_if_the_current_build_is_dismissed()
+    {
+        // Create the application
+        $application = $this->makeApplicationModel();
+
+        // Select the platform
+        $platform = new AndroidPlatform();
+
+        // Create the build
+        Carbon::setTestNow(Carbon::today()->subWeek());
+        $this->makeBuildModel($application->id, $platform->getId(), [
+            'version' => '1.0.0',
+            'available_from' => Carbon::today()->subWeek(),
+            'dismissed' => true
+        ]);
+
+        Carbon::setTestNow(Carbon::today()->addDays(6));
+        $this->makeBuildModel($application->id, $platform->getId(), [
+            'version' => '1.1.1',
+            'available_from' => Carbon::today()->subDay(),
+            'dismissed' => false
+        ]);
+
+        Carbon::setTestNow(Carbon::today()->addDays(6));
+        $this->makeBuildModel($application->id, $platform->getId(), [
+            'version' => '1.1.1',
+            'available_from' => Carbon::today()->subDay(),
+            'dismissed' => false
+        ]);
+
+        Carbon::setTestNow(Carbon::today()->addDay());
+
+        $this->expectsEvents(UpdateCheck::class);
+
+        $response = $this->post(route('api.v2.updates.get', [
+            'application' => $application->slug,
+            'platform' => $platform->getId(),
+        ]), [
+            'version' => '1.0.0',
+            'device_id' => 'aUniqueId'
+        ]);
+
+        $response->assertSuccessful();
+        $this->assertSame('1.1.1', $response->json('data.version'));
+        $this->assertTrue($response->json('forced'));
+    }
+
 }

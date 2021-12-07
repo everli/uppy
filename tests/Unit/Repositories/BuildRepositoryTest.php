@@ -56,7 +56,7 @@ class BuildRepositoryTest extends TestCase
             'platform' => $platform->getId(),
             'version' => $version,
             'file' => $buildPath,
-            'forced' => false,
+            'dismissed' => false,
             'available_from' => $build->available_from,
         ]);
     }
@@ -85,7 +85,7 @@ class BuildRepositoryTest extends TestCase
             'platform' => $platform->getId(),
             'version' => $version,
             'file' => $buildFile,
-            'forced' => 'true',
+            'dismissed' => 'true',
             'available_from' => $now->copy()->addDay()->toDateTimeString(),
         ];
 
@@ -100,7 +100,7 @@ class BuildRepositoryTest extends TestCase
             'platform' => $platform->getId(),
             'version' => $version,
             'file' => $buildPath,
-            'forced' => true,
+            'dismissed' => true,
             'available_from' => $build->available_from,
         ]);
     }
@@ -230,22 +230,22 @@ class BuildRepositoryTest extends TestCase
         factory(Build::class)->states(['Android'])->create([
             'version' => '7.5.2',
             'application_id' => $application->id,
-            'forced' => false,
-            'created_at' => Carbon::now()->subMonth(),
+            'dismissed' => false,
+            'available_from' => Carbon::now()->subMonth(),
         ]);
 
         factory(Build::class)->states(['Android'])->create([
             'version' => '7.5.3',
             'application_id' => $application->id,
-            'forced' => true,
-            'created_at' => Carbon::now()->subDay(),
+            'dismissed' => true,
+            'available_from' => Carbon::now()->subDay(),
         ]);
 
         factory(Build::class)->states(['Android'])->create([
             'version' => '7.5.4',
             'application_id' => $application->id,
-            'forced' => false,
-            'created_at' => Carbon::now(),
+            'dismissed' => false,
+            'available_from' => Carbon::now(),
         ]);
 
         Carbon::setTestNow(now()->addDay());
@@ -255,7 +255,7 @@ class BuildRepositoryTest extends TestCase
 
         $this->assertInstanceOf(Build::class, $update);
         $this->assertEquals('7.5.4', $update->version);
-        $this->assertEquals(true, $update->forced);
+        $this->assertFalse($update->dismissed);
     }
 
     /**
@@ -273,15 +273,15 @@ class BuildRepositoryTest extends TestCase
         factory(Build::class)->states(['Android'])->create([
             'version' => '7.5.3',
             'application_id' => $application->id,
-            'forced' => false,
-            'created_at' => Carbon::now()->subDay(),
+            'dismissed' => false,
+            'available_from' => Carbon::now()->subDay(),
         ]);
 
         factory(Build::class)->states(['Android'])->create([
             'version' => '7.5.4',
             'application_id' => $application->id,
-            'forced' => false,
-            'created_at' => Carbon::now(),
+            'dismissed' => false,
+            'available_from' => Carbon::now(),
         ]);
 
         Carbon::setTestNow(now()->addDay());
@@ -291,7 +291,7 @@ class BuildRepositoryTest extends TestCase
 
         $this->assertInstanceOf(Build::class, $update);
         $this->assertEquals('7.5.4', $update->version);
-        $this->assertEquals(false, $update->forced);
+        $this->assertEquals(false, $update->dismissed);
     }
 
     /**
@@ -483,5 +483,38 @@ class BuildRepositoryTest extends TestCase
             'locale' => 'it',
             'content' => 'Ciao',
         ]);
+    }
+
+    /**
+     * @test
+     */
+    public function it_return_the_last_undismissed_build()
+    {
+        // Create the application
+        $application = factory(Application::class)->create();
+
+        // Select the platform
+        $platform = new AndroidPlatform();
+
+        // Create the builds
+        factory(Build::class)->states(['Android'])->create([
+            'version' => '1.0.1',
+            'application_id' => $application->id,
+            'dismissed' => false
+        ]);
+
+        factory(Build::class)->states(['Android'])->create([
+            'version' => '1.0.2',
+            'application_id' => $application->id,
+            'dismissed' => true,
+        ]);
+
+        Carbon::setTestNow(now()->addDay());
+
+        $builds = app()->make(BuildRepository::class);
+        $update = $builds->getUpdate($application, $platform, '1.0.0');
+
+        $this->assertInstanceOf(Build::class, $update);
+        $this->assertEquals('1.0.1', $update->version);
     }
 }

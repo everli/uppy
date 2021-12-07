@@ -112,7 +112,7 @@ class BuildApiControllerTest extends TestCase
             "version" => "foo",
             "file" => UploadedFile::fake()->create('foo.txt'),
             "available_from" => "bar",
-            "forced" => "maybe",
+            "dismissed" => "maybe",
         ]);
 
         $response
@@ -132,8 +132,8 @@ class BuildApiControllerTest extends TestCase
                             "The available from is not a valid date.",
                             "The available from must be a date after or equal to now."
                         ],
-                        "forced" => [
-                            "The field forced must be a boolean."
+                        "dismissed" => [
+                            "The field dismissed must be a boolean."
                         ],
                     ]
                 ]
@@ -214,7 +214,7 @@ class BuildApiControllerTest extends TestCase
                     "platform" => "Android",
                     "version" => "1.0.0",
                     "file" => $application->slug.'/'.$application->slug.'-Android-1.0.0.apk',
-                    "forced" => false,
+                    "dismissed" => false,
                     "application_id" => $application->id,
                     "available_from" => $now->toDateTimeString(),
                 ]
@@ -257,7 +257,7 @@ class BuildApiControllerTest extends TestCase
                     "platform" => "Android",
                     "version" => "1.0.0",
                     "file" => $application->slug.'/'.$application->slug.'-Android-1.0.0.apk',
-                    "forced" => false,
+                    "dismissed" => false,
                     "application_id" => $application->id,
                     "available_from" => $now->toDateTimeString(),
                 ]
@@ -290,7 +290,7 @@ class BuildApiControllerTest extends TestCase
         $build = factory(Build::class)->states('Android')->create([
             'version' => '1.0.1',
             'application_id' => $application->id,
-            'forced' => false,
+            'dismissed' => false,
         ]);
 
         $response = $this->get(route('api.v1.builds.show', ['build' => $build->id]));
@@ -318,14 +318,14 @@ class BuildApiControllerTest extends TestCase
         $build = factory(Build::class)->states('Android')->create([
             'version' => '1.0.1',
             'application_id' => $application->id,
-            'forced' => false,
+            'dismissed' => false,
         ]);
 
         $response = $this->post(route('api.v1.builds.update', ['build' => $build->id]), [
-            'forced' => true
+            'dismissed' => true
         ]);
 
-        $this->assertTrue($response->json('data.forced'));
+        $this->assertTrue($response->json('data.dismissed'));
     }
 
     /**
@@ -392,7 +392,7 @@ class BuildApiControllerTest extends TestCase
      * @test
      * @dataProvider providesForcedFlags
      */
-    public function create_accepts_different_forced_flags($forcedFlag): void
+    public function create_accepts_different_forced_flags($dismissed): void
     {
         Sanctum::actingAs(
             factory(User::class)->create(),
@@ -406,11 +406,11 @@ class BuildApiControllerTest extends TestCase
         $response = $this->post(route('api.v1.builds.create', ['application' => $application->id]), [
             'version' => '1.0.0',
             'file' => UploadedFile::fake()->create('a-new-build.apk'),
-            'forced' => $forcedFlag
+            'dismissed' => $dismissed
         ]);
 
         $response->assertCreated();
-        $this->assertSame(filter_var($forcedFlag, FILTER_VALIDATE_BOOLEAN), $response->json('data.forced'));
+        $this->assertSame(filter_var($dismissed, FILTER_VALIDATE_BOOLEAN), $response->json('data.dismissed'));
     }
 
     /**

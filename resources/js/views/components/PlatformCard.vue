@@ -17,7 +17,7 @@
             <th>Available From</th>
             <th>Downloads</th>
             <th>Installs</th>
-            <th>Forced</th>
+            <th>Dismissed</th>
             <th></th>
           </tr>
           </thead>
@@ -29,9 +29,9 @@
             <td>{{ build.installations.toLocaleString() }}</td>
             <td>
               <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-                <input type="checkbox" @change="updateForcedStatus($event, build)" :checked="build.forced"
+                <input type="checkbox" @change="updateDismissStatus($event, build)" :checked="build.dismissed"
                        class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
-                <label :for="'forced-'+build.id"
+                <label :for="'dismissed-'+build.id"
                        class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
               </div>
             </td>
@@ -66,13 +66,13 @@ export default {
   name: 'PlatformCard',
   props: ['builds', 'platform'],
   methods: {
-    updateForcedStatus(e, build) {
+    updateDismissStatus(e, build) {
       if (!confirm('Are you sure you want update the status?')) {
         e.target.checked = !e.target.checked;
         return;
       }
       this.axios.post('/api/v1/builds/' + build.id, {
-        forced: e.target.checked
+        dismissed: e.target.checked
       })
     },
     deleteBuild(build, index) {

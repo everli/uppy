@@ -15,9 +15,9 @@ class ApplicationUpdateResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'forced' => $this->forced,
+            'forced' => false, // the endpoint v1 is deprecated
             'version' => $this->version,
-            'download_url' => url('/applications/' . $this->application->slug . '/' . $this->platform),
+            'download_url' => url('/applications/'.$this->application->slug.'/'.$this->platform),
         ];
     }
 }
