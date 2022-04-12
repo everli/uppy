@@ -11,7 +11,7 @@ use App\Platforms\PlatformService;
 use Carbon\Carbon;
 use Composer\Semver\Comparator;
 use Exception;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -165,7 +165,19 @@ class BuildRepository
             ->latest()
             ->get()
             ->groupBy('platform')
-            ->sortKeys();
+            ->sortKeys()
+            ->map(function (Collection $platformCollection) {
+                return $platformCollection->map(function (Build $build) {
+                    if (! $build->partial_rollout && $build->rollout_percentage !== 100) {
+                        $build->rollout_percentage = 100;
+                    }
+                    $build->installations_percent = $build->downloads > 0 ?
+                        (int) floor(($build->installations / $build->downloads) * 100) :
+                        0;
+
+                    return $build;
+                });
+            });
     }
 
     /**

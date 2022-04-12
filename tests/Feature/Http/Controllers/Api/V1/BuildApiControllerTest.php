@@ -7,6 +7,8 @@ namespace Tests\Feature\Http\Controllers\Api\V1;
 
 use App\Models\Application;
 use App\Models\Build;
+use App\Models\BuildEvent;
+use App\Models\Device;
 use App\Models\User;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
@@ -353,14 +355,54 @@ class BuildApiControllerTest extends TestCase
         ]);
 
         factory(Build::class)->states('Android')->create([
+            'version' => '1.0.2',
+            'application_id' => $application->id,
+            'partial_rollout' => false,
+            'rollout_percentage' => 20,
+        ]);
+
+        $build = factory(Build::class)->states('Android')->create([
             'version' => '1.1.1',
-            'application_id' => $application->id
+            'application_id' => $application->id,
+            'partial_rollout' => true,
+            'rollout_percentage' => 20,
+        ]);
+
+        factory(BuildEvent::class, 3)->create([
+            'build_id' => $build->id,
+            'event' => 'download',
+        ]);
+
+        factory(Device::class, 2)->create([
+            'build_id' => $build->id,
+            'application_id' => $application->id,
         ]);
 
         $response = $this->get(route('api.v1.applications.builds', ['application' => $application->id]));
 
         $this->assertArrayHasKey('Android', $response->json('data'));
-        $this->assertCount(3, $response->json('data.Android'));
+        $this->assertCount(4, $response->json('data.Android'));
+
+        $this->assertSame(false, $response->json('data.Android.2.partial_rollout'));
+        $this->assertSame(100, $response->json('data.Android.2.rollout_percentage'));
+
+        $this->assertSame(3, $response->json('data.Android.3.downloads'));
+        $this->assertSame(2, $response->json('data.Android.3.installations'));
+        $this->assertSame(true, $response->json('data.Android.3.partial_rollout'));
+        $this->assertSame(20, $response->json('data.Android.3.rollout_percentage'));
+        $this->assertSame(66, $response->json('data.Android.3.installations_percent'));
+
+        $expectedBuild = [
+            'downloads' => 3,
+            'installations' => 2,
+            'partial_rollout' => true,
+            'rollout_percentage' => 20,
+            'installations_percent' => 66,
+        ];
+        $buildData = $response->json('data.Android.3');
+        foreach ($expectedBuild as $key => $value) {
+            $this->assertSame($value, $buildData[$key], $key);
+        }
     }
 
     /**
