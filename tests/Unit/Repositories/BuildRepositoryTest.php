@@ -379,7 +379,7 @@ class BuildRepositoryTest extends TestCase
         ]);
 
         $builds = app()->make(BuildRepository::class);
-        $buildsByPlatform = $builds->getByPlatform($application);
+        $buildsByPlatform = $builds->getByPlatform($application, 2);
 
         $this->assertArrayHasKey('Android', $buildsByPlatform);
         $this->assertArrayHasKey('iOS', $buildsByPlatform);
@@ -397,7 +397,7 @@ class BuildRepositoryTest extends TestCase
         $application = factory(Application::class)->create();
 
         $builds = app()->make(BuildRepository::class);
-        $buildsByPlatform = $builds->getByPlatform($application);
+        $buildsByPlatform = $builds->getByPlatform($application, 2);
 
         $this->assertEmpty($buildsByPlatform);
     }
