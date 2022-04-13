@@ -26,7 +26,7 @@
           <tr class="border-t">
             <td>{{ build.version }}</td>
             <td>{{ build.available_from }}</td>
-            <td>{{ build.installations.toLocaleString() }}</td>
+            <td>{{ build.rollout_installations.toLocaleString() }}</td>
             <td>{{ build.rollout_percentage.toLocaleString() }} %</td>
             <td>{{ build.installations_percent.toLocaleString() }} %</td>
             <td>

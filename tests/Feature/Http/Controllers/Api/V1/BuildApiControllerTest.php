@@ -354,11 +354,15 @@ class BuildApiControllerTest extends TestCase
             'application_id' => $application->id
         ]);
 
-        factory(Build::class)->states('Android')->create([
+        $v102build = factory(Build::class)->states('Android')->create([
             'version' => '1.0.2',
             'application_id' => $application->id,
             'partial_rollout' => false,
             'rollout_percentage' => 20,
+        ]);
+        factory(Device::class, 5)->create([
+            'build_id' => $v102build->id,
+            'application_id' => $application->id,
         ]);
 
         $build = factory(Build::class)->states('Android')->create([
@@ -367,12 +371,10 @@ class BuildApiControllerTest extends TestCase
             'partial_rollout' => true,
             'rollout_percentage' => 20,
         ]);
-
         factory(BuildEvent::class, 3)->create([
             'build_id' => $build->id,
             'event' => 'download',
         ]);
-
         factory(Device::class, 2)->create([
             'build_id' => $build->id,
             'application_id' => $application->id,
@@ -386,18 +388,11 @@ class BuildApiControllerTest extends TestCase
         $this->assertSame(false, $response->json('data.Android.2.partial_rollout'));
         $this->assertSame(100, $response->json('data.Android.2.rollout_percentage'));
 
-        $this->assertSame(3, $response->json('data.Android.3.downloads'));
-        $this->assertSame(2, $response->json('data.Android.3.installations'));
-        $this->assertSame(true, $response->json('data.Android.3.partial_rollout'));
-        $this->assertSame(20, $response->json('data.Android.3.rollout_percentage'));
-        $this->assertSame(66, $response->json('data.Android.3.installations_percent'));
-
         $expectedBuild = [
-            'downloads' => 3,
-            'installations' => 2,
+            'rollout_installations' => 2,
             'partial_rollout' => true,
             'rollout_percentage' => 20,
-            'installations_percent' => 66,
+            'installations_percent' => 28,
         ];
         $buildData = $response->json('data.Android.3');
         foreach ($expectedBuild as $key => $value) {
@@ -467,5 +462,4 @@ class BuildApiControllerTest extends TestCase
         yield ['on'];
         yield ['off'];
     }
-
 }

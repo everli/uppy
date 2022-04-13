@@ -111,9 +111,7 @@ class BuildRepository
         Platform $platform,
         string $version,
         ?Carbon $before = null
-    ): ?Build
-    {
-
+    ): ?Build {
         /** @var Build $lastAvailableBuild */
         $lastAvailableBuild = $application->builds()
             ->where('platform', $platform->getId())
@@ -157,22 +155,29 @@ class BuildRepository
      * Return the build grouped by platform
      *
      * @param  Application  $application
+     * @param  int $applicationActiveDevices
      * @return Collection
      */
-    public function getByPlatform(Application $application): Collection
+    public function getByPlatform(Application $application, int $applicationActiveDevices): Collection
     {
         return $application->builds()
             ->latest()
             ->get()
             ->groupBy('platform')
             ->sortKeys()
-            ->map(function (Collection $platformCollection) {
-                return $platformCollection->map(function (Build $build) {
+            ->map(function (Collection $platformCollection) use ($applicationActiveDevices) {
+                return $platformCollection->map(function (Build $build) use ($applicationActiveDevices) {
+
+                    // clear 'appends', else `installations` and `downloads` will be called by the resource
+                    $build->setAppends([]);
+
                     if (! $build->partial_rollout && $build->rollout_percentage !== 100) {
                         $build->rollout_percentage = 100;
                     }
-                    $build->installations_percent = $build->downloads > 0 ?
-                        (int) floor(($build->installations / $build->downloads) * 100) :
+
+                    $build->rollout_installations = $build->installations;
+                    $build->installations_percent = $applicationActiveDevices > 0 ?
+                        (int) floor(($build->rollout_installations / $applicationActiveDevices) * 100) :
                         0;
 
                     return $build;
@@ -238,7 +243,8 @@ class BuildRepository
     ) {
         return $buildFile->storeAs(
             $application->slug,
-            sprintf("%s-%s-%s.%s",
+            sprintf(
+                "%s-%s-%s.%s",
                 $application->slug,
                 $platform->getId(),
                 $version,

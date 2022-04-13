@@ -12,6 +12,7 @@ use App\Models\Application;
 use App\Models\Build;
 use App\Platforms\Platform;
 use App\Platforms\PlatformService;
+use App\Repositories\DeviceRepository;
 use App\Rules\NewVersion;
 
 /**
@@ -23,12 +24,16 @@ class BuildApiController extends Controller
 {
 
     /**
-     * @param  Application  $application
+     * @param Application $application
+     * @param DeviceRepository $deviceRepository
      * @return ApiResource
      */
-    public function index(Application $application): ApiResource
+    public function index(Application $application, DeviceRepository $deviceRepository): ApiResource
     {
-        $builds = $this->builds->getByPlatform($application);
+        $builds = $this->builds->getByPlatform(
+            $application,
+            $deviceRepository->getApplicationActiveDevices($application->id)
+        );
 
         return new ApiResource($builds);
     }
