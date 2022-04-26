@@ -20,7 +20,6 @@ class DeviceRepository
         return Device::query()
             ->where('updated_at', '>', $threshold)
             ->where('application_id', $applicationId)
-            ->orderBy('device_id')
             ->count();
     }
 }

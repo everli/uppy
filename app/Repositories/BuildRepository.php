@@ -163,26 +163,23 @@ class BuildRepository
         return $application->builds()
             ->latest()
             ->get()
+            ->map(function (Build $build) use ($applicationActiveDevices) {
+                // clear 'appends', else `installations` and `downloads` will be called by the resource
+                $build->setAppends([]);
+
+                if (!$build->partial_rollout && $build->rollout_percentage !== 100) {
+                    $build->rollout_percentage = 100;
+                }
+
+                $build->rollout_installations = $build->installations;
+                $build->installations_percent = $applicationActiveDevices > 0 ?
+                    (int)floor(($build->rollout_installations / $applicationActiveDevices) * 100) :
+                    0;
+
+                return $build;
+            })
             ->groupBy('platform')
-            ->sortKeys()
-            ->map(function (Collection $platformCollection) use ($applicationActiveDevices) {
-                return $platformCollection->map(function (Build $build) use ($applicationActiveDevices) {
-
-                    // clear 'appends', else `installations` and `downloads` will be called by the resource
-                    $build->setAppends([]);
-
-                    if (! $build->partial_rollout && $build->rollout_percentage !== 100) {
-                        $build->rollout_percentage = 100;
-                    }
-
-                    $build->rollout_installations = $build->installations;
-                    $build->installations_percent = $applicationActiveDevices > 0 ?
-                        (int) floor(($build->rollout_installations / $applicationActiveDevices) * 100) :
-                        0;
-
-                    return $build;
-                });
-            });
+            ->sortKeys();
     }
 
     /**
