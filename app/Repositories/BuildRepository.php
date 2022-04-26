@@ -155,29 +155,13 @@ class BuildRepository
      * Return the build grouped by platform
      *
      * @param  Application  $application
-     * @param  int $applicationActiveDevices
      * @return Collection
      */
-    public function getByPlatform(Application $application, int $applicationActiveDevices): Collection
+    public function getByPlatform(Application $application): Collection
     {
         return $application->builds()
             ->latest()
             ->get()
-            ->map(function (Build $build) use ($applicationActiveDevices) {
-                // clear 'appends', else `installations` and `downloads` will be called by the resource
-                $build->setAppends([]);
-
-                if (!$build->partial_rollout && $build->rollout_percentage !== 100) {
-                    $build->rollout_percentage = 100;
-                }
-
-                $build->rollout_installations = $build->installations;
-                $build->installations_percent = $applicationActiveDevices > 0 ?
-                    (int)floor(($build->rollout_installations / $applicationActiveDevices) * 100) :
-                    0;
-
-                return $build;
-            })
             ->groupBy('platform')
             ->sortKeys();
     }

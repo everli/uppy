@@ -8,6 +8,7 @@ use App\Http\Requests\Api\V1\BuildCreateRequest;
 use App\Http\Requests\Api\V1\BuildUpdateRequest;
 use App\Http\Resources\DownloadResource;
 use App\Http\Resources\V1\ApiResource;
+use App\Http\Resources\V1\BuildApiResource;
 use App\Models\Application;
 use App\Models\Build;
 use App\Platforms\Platform;
@@ -26,16 +27,14 @@ class BuildApiController extends Controller
     /**
      * @param Application $application
      * @param DeviceRepository $deviceRepository
-     * @return ApiResource
+     * @return BuildApiResource
      */
-    public function index(Application $application, DeviceRepository $deviceRepository): ApiResource
+    public function index(Application $application, DeviceRepository $deviceRepository): BuildApiResource
     {
-        $builds = $this->builds->getByPlatform(
-            $application,
+        return new BuildApiResource(
+            $this->builds->getByPlatform($application),
             $deviceRepository->getApplicationActiveDevices($application->id)
         );
-
-        return new ApiResource($builds);
     }
 
     /**
