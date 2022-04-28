@@ -15,8 +15,9 @@
           <tr class="uppercase">
             <th>Version</th>
             <th>Available From</th>
-            <th>Downloads</th>
             <th>Installs</th>
+            <th>Rollout</th>
+            <th>Installs %</th>
             <th>Dismissed</th>
             <th></th>
           </tr>
@@ -25,8 +26,9 @@
           <tr class="border-t">
             <td>{{ build.version }}</td>
             <td>{{ build.available_from }}</td>
-            <td>{{ build.downloads.toLocaleString() }}</td>
             <td>{{ build.installations.toLocaleString() }}</td>
+            <td>{{ build.rollout_percentage.toLocaleString() }} %</td>
+            <td>{{ build.installations_percent.toLocaleString() }} %</td>
             <td>
               <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
                 <input type="checkbox" @change="updateDismissStatus($event, build)" :checked="build.dismissed"

@@ -35,6 +35,7 @@ class Build extends Model
     protected $casts = [
         'dismissed' => 'boolean',
         'partial_rollout' => 'boolean',
+        'rollout_percentage' => 'integer',
     ];
 
     /**

@@ -11,7 +11,7 @@ use App\Platforms\PlatformService;
 use Carbon\Carbon;
 use Composer\Semver\Comparator;
 use Exception;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -111,9 +111,7 @@ class BuildRepository
         Platform $platform,
         string $version,
         ?Carbon $before = null
-    ): ?Build
-    {
-
+    ): ?Build {
         /** @var Build $lastAvailableBuild */
         $lastAvailableBuild = $application->builds()
             ->where('platform', $platform->getId())
@@ -226,7 +224,8 @@ class BuildRepository
     ) {
         return $buildFile->storeAs(
             $application->slug,
-            sprintf("%s-%s-%s.%s",
+            sprintf(
+                "%s-%s-%s.%s",
                 $application->slug,
                 $platform->getId(),
                 $version,

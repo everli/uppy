@@ -50,6 +50,11 @@ docker-compose run --rm artisan user:create
 ```
 And just follow the instructions on the screen. It will create also an exernal token to enable API access using that user.
 
+
+```shell script
+docker-compose run --rm php ./vendor/bin/phpunit
+```
+
 ## Configuration
 
 ### Adding new supported platforms
