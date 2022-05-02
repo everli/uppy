@@ -29,7 +29,7 @@ class BuildUpdateRequest extends FormRequest
         return [
             'file' => ['nullable', 'file', new SupportedMimeTypes()],
             'available_from' => ['nullable', 'date'],
-            'forced' => ['nullable', new Boolean()],
+            'dismissed' => ['nullable', new Boolean()],
             'partial_rollout' => ['nullable', new Boolean()],
             'rollout_percentage' => ['nullable', 'integer'],
             'changelogs.*' => ['nullable', 'string']

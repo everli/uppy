@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $platform
  * @property string $version
  * @property string $file
- * @property bool $forced
+ * @property bool $dismissed
  * @property Carbon $available_from
  * @property string plist_url
  * @property bool $partial_rollout
@@ -33,8 +33,9 @@ class Build extends Model
      * @var array
      */
     protected $casts = [
-        'forced' => 'boolean',
+        'dismissed' => 'boolean',
         'partial_rollout' => 'boolean',
+        'rollout_percentage' => 'integer',
     ];
 
     /**
@@ -55,7 +56,7 @@ class Build extends Model
         'platform',
         'version',
         'file',
-        'forced',
+        'dismissed',
         'partial_rollout',
         'rollout_percentage',
         'available_from',
@@ -133,9 +134,9 @@ class Build extends Model
     /**
      * @param $value
      */
-    public function setForcedAttribute($value): void
+    public function setDismissedAttribute($value): void
     {
-        $this->attributes['forced'] = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+        $this->attributes['dismissed'] = filter_var($value, FILTER_VALIDATE_BOOLEAN);
     }
 
     /**

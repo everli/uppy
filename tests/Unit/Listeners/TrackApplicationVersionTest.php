@@ -68,7 +68,7 @@ class TrackApplicationVersionTest extends TestCase
         $platform = new AndroidPlatform();
         $build = $this->makeBuildModel($application->id, $platform->getId(), [
             'version' => '1.1.0',
-            'available_from' => Carbon::today()->subDay()
+             'available_from' => Carbon::today()->subDay()
         ]);
 
         event(new UpdateCheck(null, $application, $build));

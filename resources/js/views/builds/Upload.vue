@@ -32,12 +32,12 @@
           </div>
 
           <div class="mt-4">
-            <label class="text-gray-700" for="forced">Forced update</label>
+            <label class="text-gray-700" for="dismissed">Dismiss release</label>
             <div class="mt-2">
               <label class="inline-flex items-center">
-                <input type="hidden" value="off" name="forced"/>
-                <input name="forced" id="forced" type="checkbox" class="form-checkbox text-primary-800 h-6 w-6"/>
-                <span class="mx-2 text-gray-600 text-sm">This update is mandatory.</span>
+                <input type="hidden" value="off" name="dismissed"/>
+                <input name="dismissed" id="dismissed" type="checkbox" class="form-checkbox text-primary-800 h-6 w-6"/>
+                <span class="mx-2 text-gray-600 text-sm">Set this build as deprecated.</span>
               </label>
             </div>
           </div>

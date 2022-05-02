@@ -27,6 +27,7 @@ services:
       - uppy
 
   mysql:
+    platform: linux/amd64
     container_name: uppy_mysql
     image: mysql:8.0
     restart: unless-stopped

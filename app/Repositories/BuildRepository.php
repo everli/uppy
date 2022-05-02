@@ -11,8 +11,7 @@ use App\Platforms\PlatformService;
 use Carbon\Carbon;
 use Composer\Semver\Comparator;
 use Exception;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -47,7 +46,7 @@ class BuildRepository
                 'platform' => $platform->getId(),
                 'version' => Arr::get($attributes, 'version'),
                 'file' => $path,
-                'forced' => Arr::get($attributes, 'forced', false),
+                'dismissed' => Arr::get($attributes, 'dismissed', false),
                 'available_from' => $availableFrom->toDateTimeString(),
                 'partial_rollout' => Arr::get($attributes, 'partial_rollout', false),
                 'rollout_percentage' => Arr::get($attributes, 'rollout_percentage', 0),
@@ -113,26 +112,17 @@ class BuildRepository
         string $version,
         ?Carbon $before = null
     ): ?Build {
-        // get the installed version for the platform.
-        $installedVersion = $this->getByVersion($application, $platform, $version);
-
-        $lastAvailableBuilds = $application->builds()->where('platform', $platform->getId())
+        /** @var Build $lastAvailableBuild */
+        $lastAvailableBuild = $application->builds()
+            ->where('platform', $platform->getId())
             ->where('available_from', '<', $before ?? now())
-            ->when($installedVersion, function (Builder $query) use ($installedVersion) {
-                // if the installed version is on DB we get all the next versions.
-                $query->where('id', '>', $installedVersion->id);
-            }, function (Builder $query) {
-                $query->limit(1);
-            })
-            ->latest()
-            ->get();
+            ->where('dismissed', false)
+            ->latest('available_from')
+            ->first();
 
-        if ($lastAvailableBuilds->isEmpty()) {
+        if ($lastAvailableBuild === null) {
             return null;
         }
-
-        /** @var Build $lastAvailableBuild */
-        $lastAvailableBuild = $lastAvailableBuilds->first();
 
         if (Comparator::greaterThan($version, $lastAvailableBuild->version)) {
             return null;
@@ -140,12 +130,6 @@ class BuildRepository
 
         if (Comparator::equalTo($version, $lastAvailableBuild->version)) {
             return null;
-        }
-
-        // check if there is at least a `forced` version between the installed version and the latest
-        // version available, in this case we wants to set latest version available as `forced`.
-        if ($lastAvailableBuilds->contains('forced', '=', true)) {
-            $lastAvailableBuild->forced = true;
         }
 
         return $lastAvailableBuild;
@@ -240,7 +224,8 @@ class BuildRepository
     ) {
         return $buildFile->storeAs(
             $application->slug,
-            sprintf("%s-%s-%s.%s",
+            sprintf(
+                "%s-%s-%s.%s",
                 $application->slug,
                 $platform->getId(),
                 $version,

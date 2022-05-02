@@ -33,8 +33,10 @@ In order to see the dashboard, you need to compile le frontend assets:
 ```shell script
 docker-compose run --rm node npm install
 
-docker-compose run --rm node npm run dev # development assets
-docker-compose run --rm node npm run prod # production assets
+cp tailwind.config.js.example tailwind.config.js
+
+docker-compose run --rm node npm run development # development assets
+docker-compose run --rm node npm run production # production assets
 ```
 
 If you are developing on the frontend, is useful to run a watch command, to automatically compile assets on file chages:
@@ -47,6 +49,11 @@ To enable access to the admin frontend, you need to create the first admin accou
 docker-compose run --rm artisan user:create
 ```
 And just follow the instructions on the screen. It will create also an exernal token to enable API access using that user.
+
+
+```shell script
+docker-compose run --rm php ./vendor/bin/phpunit
+```
 
 ## Configuration
 
