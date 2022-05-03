@@ -328,7 +328,7 @@ class ApplicationApiControllerTest extends TestCase
 
         $response->assertSuccessful();
         $this->assertSame('1.1.1', $response->json('data.version'));
-        $this->assertTrue($response->json('forced'));
+        $this->assertTrue($response->json('data.forced'));
     }
 
 }
