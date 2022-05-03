@@ -61,7 +61,7 @@ class ApplicationApiController extends Controller
         }
 
         return ApplicationUpdateResource::make($newBuild)
-            ->additional(['forced' => optional($currentBuild)->dismissed ?? false]);
+            ->withForcedFlag(optional($currentBuild)->dismissed ?? false);
     }
 
 }
