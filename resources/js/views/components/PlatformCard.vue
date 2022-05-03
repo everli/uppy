@@ -17,7 +17,7 @@
             <th>Available From</th>
             <th>Installs</th>
             <th>Rollout</th>
-            <th>Installs %</th>
+            <th>Installs</th>
             <th>Dismissed</th>
             <th></th>
           </tr>
