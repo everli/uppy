@@ -72,7 +72,7 @@ export default {
   },
   methods: {
     markdown(value) {
-      return value ? marked(value) : value
+      return value ? marked.parse(value) : value
     },
     onDownloadStart() {
       this.downloading = true;

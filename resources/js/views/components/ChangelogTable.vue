@@ -126,7 +126,7 @@ export default {
       this.$delete(this.changelogs, locale);
     },
     markdown(value) {
-      return marked(value);
+      return marked.parse(value);
     },
   }
 }
