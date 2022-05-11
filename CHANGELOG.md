@@ -7,13 +7,13 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## NOT RELEASED
 
-## [2.2.2] - 2022-06-10
+## [2.3.1] - 2022-06-10
 
 ## Fixed
 
 - Fixed issue with marker
 
-## [2.2.1] - 2022-05-22
+## [2.3.0] - 2022-05-22
 
 ## Added
 
