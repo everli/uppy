@@ -1,0 +1,9 @@
+{
+    "/js/app.js": "/js/app.js",
+    "/js/lang/cs-json.js": "/js/lang/cs-json.js",
+    "/js/lang/fr-json.js": "/js/lang/fr-json.js",
+    "/js/lang/it-json.js": "/js/lang/it-json.js",
+    "/js/lang/pl-json.js": "/js/lang/pl-json.js",
+    "/css/app.css": "/css/app.css",
+    "/js/vendor.js": "/js/vendor.js"
+}
