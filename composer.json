@@ -8,17 +8,17 @@
     ],
     "license": "AGPL-3.0-only",
     "require": {
-      "php": "^7.2.5|^8.0",
-      "composer/semver": "^1.5",
-      "doctrine/dbal": "^2.13",
-      "fideloper/proxy": "^4.2",
-      "fruitcake/laravel-cors": "^2.0",
-      "jenssegers/agent": "^2.6",
-      "laravel/framework": "^7.24",
-      "laravel/sanctum": "^2.6",
-      "laravel/tinker": "^2.0",
-      "laravel/ui": "^2.4",
-      "league/flysystem-aws-s3-v3": "^1.0"
+        "php": "^7.2.5|^8.0",
+        "composer/semver": "^1.5",
+        "doctrine/dbal": "^2.13",
+        "fideloper/proxy": "^4.2",
+        "fruitcake/laravel-cors": "^2.0",
+        "jenssegers/agent": "^2.6",
+        "laravel/framework": "^7.24",
+        "laravel/sanctum": "^2.6",
+        "laravel/tinker": "^2.0",
+        "laravel/ui": "^2.4",
+        "league/flysystem-aws-s3-v3": "^1.0"
     },
     "require-dev": {
         "facade/ignition": "^2.0",

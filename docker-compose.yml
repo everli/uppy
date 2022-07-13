@@ -46,7 +46,7 @@ services:
       - uppy
 
   composer:
-    image: composer:latest
+    build: docker/composer
     volumes:
       - ./:/var/www
     working_dir: /var/www

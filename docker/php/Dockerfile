@@ -1,4 +1,4 @@
-FROM php:8.0-fpm-alpine
+FROM php:7.2-fpm-alpine
 ARG LOCAL_USER_ID=1000
 
 RUN set -ex \

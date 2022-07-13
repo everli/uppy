@@ -29,6 +29,8 @@ docker-compose run --rm artisan migrate:fresh
 
 A development server is now started at [http://localhost:8080](http://localhost:8080)
 
+## Building the frontend
+
 In order to see the dashboard, you need to compile the frontend assets:
 ```shell script
 docker-compose run --rm node npm install
@@ -50,7 +52,7 @@ docker-compose run --rm artisan user:create
 ```
 And just follow the instructions on the screen. It will create also an external token to enable API access using that user.
 
-
+## Running unit tests
 ```shell script
 docker-compose run --rm php ./vendor/bin/phpunit
 ```
