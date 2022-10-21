@@ -7,6 +7,7 @@ use App\Models\Build;
 use Carbon\Carbon;
 use Illuminate\Contracts\Filesystem\Cloud;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 abstract class Platform
 {
@@ -76,6 +77,8 @@ abstract class Platform
             return url($storage->url($build->file));
         }
     }
+
+    abstract public function getPackage(UploadedFile $file): ?string;
 
     /**
      * @return string

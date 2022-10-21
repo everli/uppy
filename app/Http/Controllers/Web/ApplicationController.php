@@ -96,6 +96,7 @@ class ApplicationController extends Controller
             'fileUrl' => $platform->getFileUrl($build, $storage),
             'bundleVersion' => $build->version,
             'title' => $application->name,
+            'package' => $build->package,
         ])->header('Content-Type', 'text/xml');
     }
 }

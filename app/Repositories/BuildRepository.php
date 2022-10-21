@@ -11,9 +11,9 @@ use App\Platforms\PlatformService;
 use Carbon\Carbon;
 use Composer\Semver\Comparator;
 use Exception;
-use Illuminate\Support\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -45,6 +45,7 @@ class BuildRepository
             $build = $application->builds()->create([
                 'platform' => $platform->getId(),
                 'version' => Arr::get($attributes, 'version'),
+                'package' => $platform->getPackage($artifact),
                 'file' => $path,
                 'dismissed' => Arr::get($attributes, 'dismissed', false),
                 'available_from' => $availableFrom->toDateTimeString(),
