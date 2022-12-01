@@ -38,6 +38,14 @@
               </div>
             </td>
             <td class="py-2">
+			  <button type="button" @click="downloadBuild(build)"
+                      class="px-2 py-1 bg-primary-800 text-white rounded hover:bg-primary-800 focus:outline-none inline-flex items-center uppercase">
+					  <svg v-if="!downloading" class="h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+							stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+						</svg>
+              </button>
               <router-link :to="{name: 'application.build.edit', params: {application: build.application_id, build: build.id}}"
                       class="px-2 py-1 bg-orange-600 text-white rounded hover:bg-orange-400 focus:outline-none focus:bg-orange-500 inline-flex items-center uppercase">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"
@@ -83,7 +91,12 @@ export default {
       }
       this.axios.delete('/api/v1/builds/' + build.id)
           .then(() => this.builds.splice(index, 1));
-    }
+    },
+	downloadBuild(build) {
+		const app = build.download_information
+		const downloadWindow = window.open(app.download_url, '_blank')
+		//setTimeout(() => downloadWindow.close(), 2000)
+    },
   }
 }
 </script>
