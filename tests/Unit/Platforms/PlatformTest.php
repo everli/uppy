@@ -9,6 +9,7 @@ use App\Models\Build;
 use App\Platforms\Platform;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Tests\TestCase;
 
 /**
@@ -57,6 +58,12 @@ class PlatformTest extends TestCase
         return new class extends Platform {
             public function getDownloadUrl(Application $application, Build $build, \Illuminate\Contracts\Filesystem\Cloud $storage)
             {
+                return null;
+            }
+
+            public function getPackage(UploadedFile $file): ?string
+            {
+                // TODO: Implement getPackage() method.
                 return null;
             }
         };
