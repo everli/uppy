@@ -15,17 +15,17 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         factory(Application::class, 20)
-			->create()
-			->each(function (Application $application) {
-				factory(Build::class, 10)
-					->create(['application_id' => $application->id])
-					->each(function (Build $build) use ($application) {
-						factory(Device::class)
-							->create([
-								'build_id' => $build->id,
-								'application_id' => $application->id,
-							]);
-					});
-			});
+            ->create()
+            ->each(function (Application $application) {
+                factory(Build::class, 10)
+                    ->create(['application_id' => $application->id])
+                    ->each(function (Build $build) use ($application) {
+                        factory(Device::class)
+                            ->create([
+                                'build_id' => $build->id,
+                                'application_id' => $application->id,
+                                ]);
+                    });
+            });
     }
 }
