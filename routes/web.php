@@ -20,7 +20,7 @@ Route::post('logout', 'Auth\LoginController@logout');
 Route::prefix('/applications/{application:slug}')->group(function () {
     Route::get('/', [ApplicationController::class, 'platformRedirect'])->name('applications.redirect');
     Route::get('/icon', [ApplicationController::class, 'icon'])->name('applications.icon');
-    Route::get('/{platform}/install', [ApplicationController::class, 'install'])->name('applications.install');
+    Route::get('/{platform}/install/{build?}', [ApplicationController::class, 'install'])->name('applications.install');
     Route::get('/{platform:iOS}/plist', [ApplicationController::class, 'plist'])->name('applications.plist');
 });
 

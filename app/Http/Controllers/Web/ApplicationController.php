@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Web;
 use App\Events\BuildDownloaded;
 use App\Http\Controllers\Controller;
 use App\Models\Application;
+use App\Models\Build;
 use App\Platforms\Platform;
 use App\Platforms\PlatformService;
 use Illuminate\Contracts\Filesystem\Cloud;
@@ -45,13 +46,13 @@ class ApplicationController extends Controller
      * @param Request $request
      * @param Application $application
      * @param Platform $platform
-     *
+     * @param Build|null $build
      * @param Cloud $storage
      * @return RedirectResponse
      */
-    public function install(Request $request, Application $application, Platform $platform, Cloud $storage): RedirectResponse
+    public function install(Request $request, Application $application, Platform $platform, ?Build $build, Cloud $storage): RedirectResponse
     {
-        $build = $this->builds->getLastBuild($application, $platform);
+        $build = $build->exists ? $build : $this->builds->getLastBuild($application, $platform);
 
         if (!$storage->exists($build->file)) {
             abort(Response::HTTP_NOT_FOUND);
