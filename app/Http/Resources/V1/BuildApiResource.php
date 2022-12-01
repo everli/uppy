@@ -45,7 +45,7 @@ class BuildApiResource extends JsonResource
                 $buildData['installations_percent'] = $this->applicationActiveDevices > 0 ?
                     (int) floor(($buildData['installations'] / $this->applicationActiveDevices) * 100) :
                     0;
-				$buildData['download_information'] = new DownloadResource($build);
+                $buildData['download_information'] = new DownloadResource($build);
 
                 return $buildData;
             });
