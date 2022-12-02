@@ -53,7 +53,10 @@ class PlatformTest extends TestCase
     }
 
 
-    public function provideEmptyInstance()
+    /**
+     * @return Platform
+     */
+    public function provideEmptyInstance(): Platform
     {
         return new class extends Platform {
             public function getDownloadUrl(Application $application, Build $build, \Illuminate\Contracts\Filesystem\Cloud $storage)
