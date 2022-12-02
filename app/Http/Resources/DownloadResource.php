@@ -21,7 +21,11 @@ class DownloadResource extends JsonResource
             'icon' => route('applications.icon', $this->application),
             'version' => $this->version,
             'date' => $this->available_from->toDateString(),
-            'download_url' => route('applications.install', [$this->application->slug, $this->platform]),
+            'download_url' => route('applications.install', [
+                $this->application->slug,
+                $this->platform,
+                $this->id,
+            ]),
             'changelogs' => $this->changelogs,
             'organization' => config('uppy.organization')
         ];

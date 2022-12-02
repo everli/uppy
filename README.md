@@ -10,6 +10,12 @@ cd uppy
 cp .env.example .env 
 ```
 
+Remember to add your instance's URL to this environment variable
+
+```dotenv
+SANCTUM_STATEFUL_DOMAINS=localhost:8080
+```
+
 Optionally you can add these environment variables to the `.env` file in order to avoid conflicts with other docker instances
 
 ```dotenv

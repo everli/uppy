@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\V1;
 
+use App\Http\Resources\DownloadResource;
 use App\Models\Build;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -44,6 +45,11 @@ class BuildApiResource extends JsonResource
                 $buildData['installations_percent'] = $this->applicationActiveDevices > 0 ?
                     (int) floor(($buildData['installations'] / $this->applicationActiveDevices) * 100) :
                     0;
+                $buildData['download_url'] = route('applications.install', [
+                    $build->application->slug,
+                    $build->platform,
+                    $build->id,
+                ]);
 
                 return $buildData;
             });
