@@ -24,7 +24,7 @@ class DownloadResource extends JsonResource
             'download_url' => route('applications.install', [
                 $this->application->slug,
                 $this->platform,
-                $this,
+                $this->id,
             ]),
             'changelogs' => $this->changelogs,
             'organization' => config('uppy.organization')

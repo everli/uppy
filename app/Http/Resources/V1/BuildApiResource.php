@@ -48,7 +48,7 @@ class BuildApiResource extends JsonResource
                 $buildData['download_url'] = route('applications.install', [
                     $build->application->slug,
                     $build->platform,
-                    $build,
+                    $build->id,
                 ]);
 
                 return $buildData;
