@@ -63,7 +63,6 @@ class PlatformTest extends TestCase
 
             public function getPackage(UploadedFile $file): ?string
             {
-                // TODO: Implement getPackage() method.
                 return null;
             }
         };
