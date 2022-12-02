@@ -44,15 +44,15 @@ class ApplicationController extends Controller
      * Redirects to the right download flow.
      *
      * @param Request $request
+     * @param Cloud $storage
      * @param Application $application
      * @param Platform $platform
      * @param Build|null $build
-     * @param Cloud $storage
      * @return RedirectResponse
      */
-    public function install(Request $request, Application $application, Platform $platform, ?Build $build, Cloud $storage): RedirectResponse
+    public function install(Request $request, Cloud $storage, Application $application, Platform $platform, ?Build $build = null): RedirectResponse
     {
-        $build = $build->exists ? $build : $this->builds->getLastBuild($application, $platform);
+        $build = $build ?? $this->builds->getLastBuild($application, $platform);
 
         if (!$storage->exists($build->file)) {
             abort(Response::HTTP_NOT_FOUND);
