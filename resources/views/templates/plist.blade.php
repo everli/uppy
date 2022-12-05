@@ -19,7 +19,7 @@
                 <key>metadata</key>
                 <dict>
                     <key>bundle-identifier</key>
-                    <string>[Bundle ID]</string>
+                    <string>{!! $package ?? 'com.default.identifier' !!}</string>
                     <key>bundle-version</key>
                     <string>{{ $bundleVersion }}</string>
                     <key>kind</key>

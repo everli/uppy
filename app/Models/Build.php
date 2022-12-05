@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Application $application
  * @property string $platform
  * @property string $version
+ * @property string $package
  * @property string $file
  * @property bool $dismissed
  * @property Carbon $available_from
@@ -55,6 +56,7 @@ class Build extends Model
     protected $fillable = [
         'platform',
         'version',
+        'package',
         'file',
         'dismissed',
         'partial_rollout',

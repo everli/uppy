@@ -10,6 +10,12 @@ cd uppy
 cp .env.example .env 
 ```
 
+Remember to add your instance's URL to this environment variable
+
+```dotenv
+SANCTUM_STATEFUL_DOMAINS=localhost:8080
+```
+
 Optionally you can add these environment variables to the `.env` file in order to avoid conflicts with other docker instances
 
 ```dotenv
@@ -29,7 +35,9 @@ docker-compose run --rm artisan migrate:fresh
 
 A development server is now started at [http://localhost:8080](http://localhost:8080)
 
-In order to see the dashboard, you need to compile le frontend assets:
+## Building the frontend
+
+In order to see the dashboard, you need to compile the frontend assets:
 ```shell script
 docker-compose run --rm node npm install
 
@@ -39,7 +47,7 @@ docker-compose run --rm node npm run development # development assets
 docker-compose run --rm node npm run production # production assets
 ```
 
-If you are developing on the frontend, is useful to run a watch command, to automatically compile assets on file chages:
+If you are developing on the frontend, is useful to run a watch command, to automatically compile assets on file changes:
 ```shell script
 docker-compose run --rm node npm run watch
 ```
@@ -48,9 +56,9 @@ To enable access to the admin frontend, you need to create the first admin accou
 ```shell script
 docker-compose run --rm artisan user:create
 ```
-And just follow the instructions on the screen. It will create also an exernal token to enable API access using that user.
+And just follow the instructions on the screen. It will create also an external token to enable API access using that user.
 
-
+## Running unit tests
 ```shell script
 docker-compose run --rm php ./vendor/bin/phpunit
 ```
