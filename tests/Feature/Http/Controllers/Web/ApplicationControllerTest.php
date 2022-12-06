@@ -65,6 +65,7 @@ class ApplicationControllerTest extends TestCase
         $response = $this->get(route('applications.plist', [
             'application' => $app->slug,
             'platform' => $build->platform,
+            'build' => $build->id
         ]));
 
         $platform = app()->make(PlatformService::class)->get($build->platform);
@@ -87,6 +88,7 @@ class ApplicationControllerTest extends TestCase
         $response = $this->get(route('applications.plist', [
             'application' => $app->slug,
             'platform' => $build->platform,
+            'build' => $build->id
         ]));
 
         $response->assertNotFound();

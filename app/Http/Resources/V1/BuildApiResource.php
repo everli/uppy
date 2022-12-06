@@ -2,10 +2,12 @@
 
 namespace App\Http\Resources\V1;
 
-use App\Http\Resources\DownloadResource;
 use App\Models\Build;
+use App\Platforms\Platform;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Jenssegers\Agent\Agent;
 
 class BuildApiResource extends JsonResource
 {
@@ -15,25 +17,32 @@ class BuildApiResource extends JsonResource
     private $applicationActiveDevices;
 
     /**
+     * @var Agent|null
+     */
+    private $agent;
+
+    /**
      * Create a new resource instance.
      *
-     * @param  mixed  $resource
-     * @param  int $applicationActiveDevices
-     * @return void
+     * @param mixed $resource
+     * @param int $applicationActiveDevices
+     * @param Agent|null $agent
      */
-    public function __construct($resource, int $applicationActiveDevices)
+    public function __construct($resource, int $applicationActiveDevices, ?Agent $agent = null)
     {
+        parent::__construct($resource);
         $this->resource = $resource;
         $this->applicationActiveDevices = $applicationActiveDevices;
+        $this->agent = $agent;
     }
     
     /**
      * Transform the resource into an array.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      * @return array
      */
-    public function toArray($request)
+    public function toArray($request): array
     {
         $data = $this->resource->map(function (Collection $collection) {
             return $collection->map(function (Build $build) {
@@ -45,16 +54,25 @@ class BuildApiResource extends JsonResource
                 $buildData['installations_percent'] = $this->applicationActiveDevices > 0 ?
                     (int) floor(($buildData['installations'] / $this->applicationActiveDevices) * 100) :
                     0;
-                $buildData['download_url'] = route('applications.install', [
-                    $build->application->slug,
-                    $build->platform,
-                    $build->id,
-                ]);
+                $buildData['download_url'] = $this->getDownloadUrl($build);
 
                 return $buildData;
             });
         });
 
         return ['data' => $data];
+    }
+
+    /**
+     * @param Build $build
+     * @return string
+     */
+    private function getDownloadUrl(Build $build): string
+    {
+        return route('applications.raw', [
+            $build->application->slug,
+            $build->platform,
+            $build->id,
+        ]);
     }
 }
