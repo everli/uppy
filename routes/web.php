@@ -21,7 +21,8 @@ Route::prefix('/applications/{application:slug}')->group(function () {
     Route::get('/', [ApplicationController::class, 'platformRedirect'])->name('applications.redirect');
     Route::get('/icon', [ApplicationController::class, 'icon'])->name('applications.icon');
     Route::get('/{platform}/install/{build?}', [ApplicationController::class, 'install'])->name('applications.install');
-    Route::get('/{platform:iOS}/plist', [ApplicationController::class, 'plist'])->name('applications.plist');
+    Route::get('/{platform}/raw/{build?}', [ApplicationController::class, 'raw'])->name('applications.raw');
+    Route::get('/{platform:iOS}/plist/{build?}', [ApplicationController::class, 'plist'])->name('applications.plist');
 });
 
 Route::view('/{catch?}', 'app')->where('catch', '(.*)')->name('app');

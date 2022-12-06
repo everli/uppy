@@ -15,6 +15,7 @@ use App\Platforms\Platform;
 use App\Platforms\PlatformService;
 use App\Repositories\DeviceRepository;
 use App\Rules\NewVersion;
+use Jenssegers\Agent\Agent;
 
 /**
  * Class PackageController
@@ -27,13 +28,15 @@ class BuildApiController extends Controller
     /**
      * @param Application $application
      * @param DeviceRepository $deviceRepository
+     * @param Agent $agent
      * @return BuildApiResource
      */
-    public function index(Application $application, DeviceRepository $deviceRepository): BuildApiResource
+    public function index(Application $application, DeviceRepository $deviceRepository, Agent $agent): BuildApiResource
     {
         return new BuildApiResource(
             $this->builds->getByPlatform($application),
-            $deviceRepository->getApplicationActiveDevices($application->id)
+            $deviceRepository->getApplicationActiveDevices($application->id),
+            $agent
         );
     }
 
