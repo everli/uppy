@@ -32,7 +32,11 @@ class IOSPlatform extends Platform
      */
     public function getDownloadUrl(Application $application, Build $build, Cloud $storage)
     {
-        $plistUrl = route('applications.plist', [$application->slug, $this->getId()]);
+        $plistUrl = route('applications.plist', [
+            'application' => $application->slug,
+            'platform' => $this->getId(),
+            'build' => $build->plist_url
+        ]);
         return 'itms-services://?action=download-manifest&url='.urlencode($plistUrl);
     }
 

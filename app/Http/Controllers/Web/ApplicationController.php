@@ -22,14 +22,13 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class ApplicationController extends Controller
 {
-
     /**
      * @param Application $application
      * @param Agent $agent
      * @param PlatformService $platforms
      * @return RedirectResponse
      */
-    public function platformRedirect(Application $application, Agent $agent, PlatformService $platforms)
+    public function platformRedirect(Application $application, Agent $agent, PlatformService $platforms): RedirectResponse
     {
         $build = $this->builds->getLastBuild($application, $platforms->matchFromAgent($agent));
 
@@ -83,15 +82,15 @@ class ApplicationController extends Controller
     /**
      * Returns plist needed for iOS install.
      *
+     * @param Cloud $storage
      * @param Application $application
      * @param Platform $platform
-     *
-     * @param Cloud $storage
+     * @param Build|null $build
      * @return Response
      */
-    public function plist(Application $application, Platform $platform, Cloud $storage): Response
+    public function plist(Cloud $storage, Application $application, Platform $platform, ?Build $build = null): Response
     {
-        $build = $this->builds->getLastBuild($application, $platform);
+        $build = $build ?? $this->builds->getLastBuild($application, $platform);
 
         return response()->view('templates.plist', [
             'fileUrl' => $platform->getFileUrl($build, $storage),
@@ -99,5 +98,21 @@ class ApplicationController extends Controller
             'title' => $application->name,
             'package' => $build->package,
         ])->header('Content-Type', 'text/xml');
+    }
+
+    /**
+     * Redirects to the raw file saved in storage.
+     *
+     * @param Cloud $storage
+     * @param Application $application
+     * @param Platform $platform
+     * @param Build|null $build
+     * @return RedirectResponse
+     */
+    public function raw(Cloud $storage, Application $application, Platform $platform, ?Build $build = null): RedirectResponse
+    {
+        $build = $build ?? $this->builds->getLastBuild($application, $platform);
+
+        return redirect()->to($platform->getFileUrl($build, $storage));
     }
 }
