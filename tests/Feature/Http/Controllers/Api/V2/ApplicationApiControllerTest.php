@@ -282,6 +282,110 @@ class ApplicationApiControllerTest extends TestCase
 
     /**
      * @test
+     */
+    public function it_returns_forced_update_when_device_switches_from_beta_to_stable_slug()
+    {
+        $application = $this->makeApplicationModel();
+        $platform = new AndroidPlatform();
+
+        // Production slug only has stable builds
+        Carbon::setTestNow(Carbon::today()->subWeek());
+        $this->makeBuildModel($application->id, $platform->getId(), [
+            'version' => '12.0.15',
+            'available_from' => Carbon::today()->subWeek(),
+        ]);
+
+        Carbon::setTestNow(Carbon::today()->addDay());
+
+        $this->expectsEvents(UpdateCheck::class);
+
+        // Device comes from beta cluster with a higher version
+        $response = $this->post(route('api.v2.updates.get', [
+            'application' => $application->slug,
+            'platform' => $platform->getId(),
+        ]), [
+            'version' => '12.0.16-beta',
+            'device_id' => 'aUniqueId'
+        ]);
+
+        $response->assertSuccessful();
+        $this->assertSame('12.0.15', $response->json('data.version'));
+        $this->assertTrue($response->json('data.forced'));
+    }
+
+    /**
+     * @test
+     */
+    public function it_returns_forced_update_when_device_switches_from_stable_to_beta_slug()
+    {
+        $application = $this->makeApplicationModel();
+        $platform = new AndroidPlatform();
+
+        // Beta slug has beta builds
+        Carbon::setTestNow(Carbon::today()->subWeek());
+        $this->makeBuildModel($application->id, $platform->getId(), [
+            'version' => '12.0.16-beta',
+            'available_from' => Carbon::today()->subWeek(),
+        ]);
+
+        Carbon::setTestNow(Carbon::today()->addDay());
+
+        $this->expectsEvents(UpdateCheck::class);
+
+        // Device comes from production cluster
+        $response = $this->post(route('api.v2.updates.get', [
+            'application' => $application->slug,
+            'platform' => $platform->getId(),
+        ]), [
+            'version' => '12.0.15',
+            'device_id' => 'aUniqueId'
+        ]);
+
+        $response->assertSuccessful();
+        $this->assertSame('12.0.16-beta', $response->json('data.version'));
+        $this->assertTrue($response->json('data.forced'));
+    }
+
+    /**
+     * @test
+     */
+    public function it_returns_non_forced_update_when_same_stability()
+    {
+        $application = $this->makeApplicationModel();
+        $platform = new AndroidPlatform();
+
+        Carbon::setTestNow(Carbon::today()->subWeek());
+        $this->makeBuildModel($application->id, $platform->getId(), [
+            'version' => '1.0.0',
+            'available_from' => Carbon::today()->subWeek(),
+        ]);
+
+        Carbon::setTestNow(Carbon::today()->addDays(6));
+        $this->makeBuildModel($application->id, $platform->getId(), [
+            'version' => '1.1.0',
+            'available_from' => Carbon::today()->subDay(),
+        ]);
+
+        Carbon::setTestNow(Carbon::today()->addDay());
+
+        $this->expectsEvents(UpdateCheck::class);
+
+        // Same stability (both stable), normal update → not forced
+        $response = $this->post(route('api.v2.updates.get', [
+            'application' => $application->slug,
+            'platform' => $platform->getId(),
+        ]), [
+            'version' => '1.0.0',
+            'device_id' => 'aUniqueId'
+        ]);
+
+        $response->assertSuccessful();
+        $this->assertSame('1.1.0', $response->json('data.version'));
+        $this->assertFalse($response->json('data.forced'));
+    }
+
+    /**
+     * @test
      * @throws \Exception
      */
     public function forced_is_true_if_the_current_build_is_dismissed()

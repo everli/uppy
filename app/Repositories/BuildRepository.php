@@ -10,6 +10,7 @@ use App\Platforms\Platform;
 use App\Platforms\PlatformService;
 use Carbon\Carbon;
 use Composer\Semver\Comparator;
+use Composer\Semver\VersionParser;
 use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
@@ -123,6 +124,17 @@ class BuildRepository
 
         if ($lastAvailableBuild === null) {
             return null;
+        }
+
+        // If the stability suffix changed (e.g. beta→stable, dev→beta),
+        // always return the build regardless of version comparison.
+        // This handles cluster/slug switches where the device comes from
+        // a different release track.
+        $deviceStability = VersionParser::parseStability($version);
+        $buildStability = VersionParser::parseStability($lastAvailableBuild->version);
+
+        if ($deviceStability !== $buildStability) {
+            return $lastAvailableBuild;
         }
 
         if (Comparator::greaterThan($version, $lastAvailableBuild->version)) {

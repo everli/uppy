@@ -488,6 +488,107 @@ class BuildRepositoryTest extends TestCase
     /**
      * @test
      */
+    public function getUpdate_returns_build_when_stability_suffix_changes_from_beta_to_stable()
+    {
+        $application = factory(Application::class)->create();
+        $platform = new AndroidPlatform();
+
+        // Production build (stable)
+        factory(Build::class)->states(['Android'])->create([
+            'version' => '12.0.15',
+            'application_id' => $application->id,
+            'available_from' => Carbon::now()->subDay(),
+        ]);
+
+        Carbon::setTestNow(now()->addDay());
+
+        $builds = app()->make(BuildRepository::class);
+
+        // Device comes from beta with a HIGHER version number
+        $update = $builds->getUpdate($application, $platform, '12.0.16-beta');
+
+        $this->assertInstanceOf(Build::class, $update);
+        $this->assertEquals('12.0.15', $update->version);
+    }
+
+    /**
+     * @test
+     */
+    public function getUpdate_returns_build_when_stability_suffix_changes_from_stable_to_beta()
+    {
+        $application = factory(Application::class)->create();
+        $platform = new AndroidPlatform();
+
+        // Beta build
+        factory(Build::class)->states(['Android'])->create([
+            'version' => '12.0.16-beta',
+            'application_id' => $application->id,
+            'available_from' => Carbon::now()->subDay(),
+        ]);
+
+        Carbon::setTestNow(now()->addDay());
+
+        $builds = app()->make(BuildRepository::class);
+
+        // Device comes from production (stable)
+        $update = $builds->getUpdate($application, $platform, '12.0.15');
+
+        $this->assertInstanceOf(Build::class, $update);
+        $this->assertEquals('12.0.16-beta', $update->version);
+    }
+
+    /**
+     * @test
+     */
+    public function getUpdate_returns_build_when_stability_suffix_changes_from_dev_to_stable()
+    {
+        $application = factory(Application::class)->create();
+        $platform = new AndroidPlatform();
+
+        factory(Build::class)->states(['Android'])->create([
+            'version' => '12.0.15',
+            'application_id' => $application->id,
+            'available_from' => Carbon::now()->subDay(),
+        ]);
+
+        Carbon::setTestNow(now()->addDay());
+
+        $builds = app()->make(BuildRepository::class);
+
+        // Device comes from dev with higher version
+        $update = $builds->getUpdate($application, $platform, '12.0.20-dev');
+
+        $this->assertInstanceOf(Build::class, $update);
+        $this->assertEquals('12.0.15', $update->version);
+    }
+
+    /**
+     * @test
+     */
+    public function getUpdate_returns_null_when_same_stability_and_device_version_is_greater()
+    {
+        $application = factory(Application::class)->create();
+        $platform = new AndroidPlatform();
+
+        factory(Build::class)->states(['Android'])->create([
+            'version' => '12.0.15-beta',
+            'application_id' => $application->id,
+            'available_from' => Carbon::now()->subDay(),
+        ]);
+
+        Carbon::setTestNow(now()->addDay());
+
+        $builds = app()->make(BuildRepository::class);
+
+        // Same stability (beta), device version is greater → no update
+        $update = $builds->getUpdate($application, $platform, '12.0.16-beta');
+
+        $this->assertNull($update);
+    }
+
+    /**
+     * @test
+     */
     public function it_return_the_last_undismissed_build()
     {
         // Create the application

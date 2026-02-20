@@ -12,6 +12,7 @@ use App\Http\Requests\Api\V2\UpdateRequest;
 use App\Http\Resources\V2\ApplicationUpdateResource;
 use App\Models\Application;
 use App\Platforms\Platform;
+use Composer\Semver\VersionParser;
 use Illuminate\Http\Response;
 
 class ApplicationApiController extends Controller
@@ -60,8 +61,12 @@ class ApplicationApiController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
 
+        $deviceStability = VersionParser::parseStability($request->get('version'));
+        $buildStability = VersionParser::parseStability($newBuild->version);
+        $stabilityChanged = $deviceStability !== $buildStability;
+
         return ApplicationUpdateResource::make($newBuild)
-            ->withForcedFlag(optional($currentBuild)->dismissed ?? false);
+            ->withForcedFlag($stabilityChanged || (optional($currentBuild)->dismissed ?? false));
     }
 
 }
