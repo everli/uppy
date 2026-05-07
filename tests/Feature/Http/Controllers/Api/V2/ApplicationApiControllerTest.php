@@ -283,15 +283,15 @@ class ApplicationApiControllerTest extends TestCase
     /**
      * @test
      */
-    public function it_returns_forced_update_when_device_switches_from_beta_to_stable_slug()
+    public function it_returns_forced_update_when_device_version_is_higher_and_not_in_catalog()
     {
         $application = $this->makeApplicationModel();
         $platform = new AndroidPlatform();
 
-        // Production slug only has stable builds
+        // Production cluster only has an older build
         Carbon::setTestNow(Carbon::today()->subWeek());
         $this->makeBuildModel($application->id, $platform->getId(), [
-            'version' => '12.0.15',
+            'version' => '12.0.17',
             'available_from' => Carbon::today()->subWeek(),
         ]);
 
@@ -299,29 +299,29 @@ class ApplicationApiControllerTest extends TestCase
 
         $this->expectsEvents(UpdateCheck::class);
 
-        // Device comes from beta cluster with a higher version
+        // Device was moved from beta to production: its version is not in
+        // this cluster's catalog
         $response = $this->post(route('api.v2.updates.get', [
             'application' => $application->slug,
             'platform' => $platform->getId(),
         ]), [
-            'version' => '12.0.16-beta',
+            'version' => '12.0.35',
             'device_id' => 'aUniqueId'
         ]);
 
         $response->assertSuccessful();
-        $this->assertSame('12.0.15', $response->json('data.version'));
+        $this->assertSame('12.0.17', $response->json('data.version'));
         $this->assertTrue($response->json('data.forced'));
     }
 
     /**
      * @test
      */
-    public function it_returns_forced_update_when_device_switches_from_stable_to_beta_slug()
+    public function it_returns_forced_update_when_device_version_uses_unknown_suffix()
     {
         $application = $this->makeApplicationModel();
         $platform = new AndroidPlatform();
 
-        // Beta slug has beta builds
         Carbon::setTestNow(Carbon::today()->subWeek());
         $this->makeBuildModel($application->id, $platform->getId(), [
             'version' => '12.0.16-beta',
@@ -332,7 +332,7 @@ class ApplicationApiControllerTest extends TestCase
 
         $this->expectsEvents(UpdateCheck::class);
 
-        // Device comes from production cluster
+        // Device on a stable version not present in this beta-only catalog
         $response = $this->post(route('api.v2.updates.get', [
             'application' => $application->slug,
             'platform' => $platform->getId(),
@@ -349,7 +349,7 @@ class ApplicationApiControllerTest extends TestCase
     /**
      * @test
      */
-    public function it_returns_non_forced_update_when_same_stability()
+    public function it_returns_non_forced_update_when_device_version_is_in_catalog()
     {
         $application = $this->makeApplicationModel();
         $platform = new AndroidPlatform();
@@ -370,7 +370,7 @@ class ApplicationApiControllerTest extends TestCase
 
         $this->expectsEvents(UpdateCheck::class);
 
-        // Same stability (both stable), normal update → not forced
+        // Device's version exists in the catalog → regular (non-forced) update
         $response = $this->post(route('api.v2.updates.get', [
             'application' => $application->slug,
             'platform' => $platform->getId(),
