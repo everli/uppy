@@ -16,6 +16,7 @@ jobs:
       with:
         php-version: '8.0'
         extensions: zip
+        tools: composer:2.3.8
     - uses: actions/checkout@v2
     - name: Copy .env
       run: php -r "file_exists('.env') || copy('.env.example', '.env');"
