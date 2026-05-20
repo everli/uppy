@@ -386,6 +386,47 @@ class ApplicationApiControllerTest extends TestCase
 
     /**
      * @test
+     */
+    public function it_returns_forced_update_when_device_version_in_catalog_is_dismissed_and_is_higher()
+    {
+        $application = $this->makeApplicationModel();
+        $platform = new AndroidPlatform();
+
+        Carbon::setTestNow(Carbon::today()->subWeek());
+
+        // Latest healthy build available
+        $this->makeBuildModel($application->id, $platform->getId(), [
+            'version' => '12.0.15',
+            'available_from' => Carbon::today()->subWeek(),
+        ]);
+
+        // The device's version is in the catalog but has been dismissed,
+        // so it must be treated as unavailable and the device pushed back
+        $this->makeBuildModel($application->id, $platform->getId(), [
+            'version' => '12.0.16',
+            'available_from' => Carbon::today()->subWeek(),
+            'dismissed' => true,
+        ]);
+
+        Carbon::setTestNow(Carbon::today()->addDay());
+
+        $this->expectsEvents(UpdateCheck::class);
+
+        $response = $this->post(route('api.v2.updates.get', [
+            'application' => $application->slug,
+            'platform' => $platform->getId(),
+        ]), [
+            'version' => '12.0.16',
+            'device_id' => 'aUniqueId'
+        ]);
+
+        $response->assertSuccessful();
+        $this->assertSame('12.0.15', $response->json('data.version'));
+        $this->assertTrue($response->json('data.forced'));
+    }
+
+    /**
+     * @test
      * @throws \Exception
      */
     public function forced_is_true_if_the_current_build_is_dismissed()
