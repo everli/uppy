@@ -282,6 +282,151 @@ class ApplicationApiControllerTest extends TestCase
 
     /**
      * @test
+     */
+    public function it_returns_forced_update_when_device_version_is_higher_and_not_in_catalog()
+    {
+        $application = $this->makeApplicationModel();
+        $platform = new AndroidPlatform();
+
+        // Production cluster only has an older build
+        Carbon::setTestNow(Carbon::today()->subWeek());
+        $this->makeBuildModel($application->id, $platform->getId(), [
+            'version' => '12.0.17',
+            'available_from' => Carbon::today()->subWeek(),
+        ]);
+
+        Carbon::setTestNow(Carbon::today()->addDay());
+
+        $this->expectsEvents(UpdateCheck::class);
+
+        // Device was moved from beta to production: its version is not in
+        // this cluster's catalog
+        $response = $this->post(route('api.v2.updates.get', [
+            'application' => $application->slug,
+            'platform' => $platform->getId(),
+        ]), [
+            'version' => '12.0.35',
+            'device_id' => 'aUniqueId'
+        ]);
+
+        $response->assertSuccessful();
+        $this->assertSame('12.0.17', $response->json('data.version'));
+        $this->assertTrue($response->json('data.forced'));
+    }
+
+    /**
+     * @test
+     */
+    public function it_returns_forced_update_when_device_version_uses_unknown_suffix()
+    {
+        $application = $this->makeApplicationModel();
+        $platform = new AndroidPlatform();
+
+        Carbon::setTestNow(Carbon::today()->subWeek());
+        $this->makeBuildModel($application->id, $platform->getId(), [
+            'version' => '12.0.16-beta',
+            'available_from' => Carbon::today()->subWeek(),
+        ]);
+
+        Carbon::setTestNow(Carbon::today()->addDay());
+
+        $this->expectsEvents(UpdateCheck::class);
+
+        // Device on a stable version not present in this beta-only catalog
+        $response = $this->post(route('api.v2.updates.get', [
+            'application' => $application->slug,
+            'platform' => $platform->getId(),
+        ]), [
+            'version' => '12.0.15',
+            'device_id' => 'aUniqueId'
+        ]);
+
+        $response->assertSuccessful();
+        $this->assertSame('12.0.16-beta', $response->json('data.version'));
+        $this->assertTrue($response->json('data.forced'));
+    }
+
+    /**
+     * @test
+     */
+    public function it_returns_non_forced_update_when_device_version_is_in_catalog()
+    {
+        $application = $this->makeApplicationModel();
+        $platform = new AndroidPlatform();
+
+        Carbon::setTestNow(Carbon::today()->subWeek());
+        $this->makeBuildModel($application->id, $platform->getId(), [
+            'version' => '1.0.0',
+            'available_from' => Carbon::today()->subWeek(),
+        ]);
+
+        Carbon::setTestNow(Carbon::today()->addDays(6));
+        $this->makeBuildModel($application->id, $platform->getId(), [
+            'version' => '1.1.0',
+            'available_from' => Carbon::today()->subDay(),
+        ]);
+
+        Carbon::setTestNow(Carbon::today()->addDay());
+
+        $this->expectsEvents(UpdateCheck::class);
+
+        // Device's version exists in the catalog → regular (non-forced) update
+        $response = $this->post(route('api.v2.updates.get', [
+            'application' => $application->slug,
+            'platform' => $platform->getId(),
+        ]), [
+            'version' => '1.0.0',
+            'device_id' => 'aUniqueId'
+        ]);
+
+        $response->assertSuccessful();
+        $this->assertSame('1.1.0', $response->json('data.version'));
+        $this->assertFalse($response->json('data.forced'));
+    }
+
+    /**
+     * @test
+     */
+    public function it_returns_forced_update_when_device_version_in_catalog_is_dismissed_and_is_higher()
+    {
+        $application = $this->makeApplicationModel();
+        $platform = new AndroidPlatform();
+
+        Carbon::setTestNow(Carbon::today()->subWeek());
+
+        // Latest healthy build available
+        $this->makeBuildModel($application->id, $platform->getId(), [
+            'version' => '12.0.15',
+            'available_from' => Carbon::today()->subWeek(),
+        ]);
+
+        // The device's version is in the catalog but has been dismissed,
+        // so it must be treated as unavailable and the device pushed back
+        $this->makeBuildModel($application->id, $platform->getId(), [
+            'version' => '12.0.16',
+            'available_from' => Carbon::today()->subWeek(),
+            'dismissed' => true,
+        ]);
+
+        Carbon::setTestNow(Carbon::today()->addDay());
+
+        $this->expectsEvents(UpdateCheck::class);
+
+        $response = $this->post(route('api.v2.updates.get', [
+            'application' => $application->slug,
+            'platform' => $platform->getId(),
+        ]), [
+            'version' => '12.0.16',
+            'device_id' => 'aUniqueId'
+        ]);
+
+        $response->assertSuccessful();
+        $this->assertSame('12.0.15', $response->json('data.version'));
+        $this->assertTrue($response->json('data.forced'));
+    }
+
+    /**
+     * @test
      * @throws \Exception
      */
     public function forced_is_true_if_the_current_build_is_dismissed()

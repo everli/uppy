@@ -60,8 +60,12 @@ class ApplicationApiController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
 
+        // If the device's reported version is not in this app+platform catalog,
+        // it has come from a different cluster/track and we need to force an update.
+        $versionNotInCatalog = $currentBuild === null;
+
         return ApplicationUpdateResource::make($newBuild)
-            ->withForcedFlag(optional($currentBuild)->dismissed ?? false);
+            ->withForcedFlag($versionNotInCatalog || (optional($currentBuild)->dismissed ?? false));
     }
 
 }

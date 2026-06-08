@@ -155,9 +155,16 @@ class BuildRepositoryTest extends TestCase
         // Select the platform
         $platform = new AndroidPlatform();
 
-        // Create the build
+        // Last available build (older)
         $this->makeBuildModel($application->id, 'Android', [
             'version' => '1.0.0',
+        ]);
+
+        // Device's version exists in the catalog but is not yet available
+        // (so the device is legitimately on a build of this cluster)
+        factory(Build::class)->states(['Android', 'postponed'])->create([
+            'version' => '1.0.1',
+            'application_id' => $application->id,
         ]);
 
         $builds = app()->make(BuildRepository::class);
@@ -483,6 +490,122 @@ class BuildRepositoryTest extends TestCase
             'locale' => 'it',
             'content' => 'Ciao',
         ]);
+    }
+
+    /**
+     * @test
+     */
+    public function getUpdate_returns_build_when_device_version_is_not_in_catalog_and_is_higher()
+    {
+        $application = factory(Application::class)->create();
+        $platform = new AndroidPlatform();
+
+        // Production cluster only has an older build
+        factory(Build::class)->states(['Android'])->create([
+            'version' => '12.0.17',
+            'application_id' => $application->id,
+            'available_from' => Carbon::now()->subDay(),
+        ]);
+
+        Carbon::setTestNow(now()->addDay());
+
+        $builds = app()->make(BuildRepository::class);
+
+        // Device was switched from beta cluster: its version (12.0.35)
+        // does not exist in this catalog
+        $update = $builds->getUpdate($application, $platform, '12.0.35');
+
+        $this->assertInstanceOf(Build::class, $update);
+        $this->assertEquals('12.0.17', $update->version);
+    }
+
+    /**
+     * @test
+     */
+    public function getUpdate_returns_build_when_device_version_is_not_in_catalog_and_uses_different_suffix()
+    {
+        $application = factory(Application::class)->create();
+        $platform = new AndroidPlatform();
+
+        factory(Build::class)->states(['Android'])->create([
+            'version' => '12.0.15',
+            'application_id' => $application->id,
+            'available_from' => Carbon::now()->subDay(),
+        ]);
+
+        Carbon::setTestNow(now()->addDay());
+
+        $builds = app()->make(BuildRepository::class);
+
+        // Device on a beta-tagged version not present in this catalog
+        $update = $builds->getUpdate($application, $platform, '12.0.16-beta');
+
+        $this->assertInstanceOf(Build::class, $update);
+        $this->assertEquals('12.0.15', $update->version);
+    }
+
+    /**
+     * @test
+     */
+    public function getUpdate_returns_null_when_device_version_in_catalog_and_is_greater_than_latest_available()
+    {
+        $application = factory(Application::class)->create();
+        $platform = new AndroidPlatform();
+
+        factory(Build::class)->states(['Android'])->create([
+            'version' => '12.0.15-beta',
+            'application_id' => $application->id,
+            'available_from' => Carbon::now()->subDay(),
+        ]);
+
+        // Device's version exists in the catalog as a postponed (not yet
+        // available) build, so the device legitimately belongs to this cluster
+        factory(Build::class)->states(['Android', 'postponed'])->create([
+            'version' => '12.0.16-beta',
+            'application_id' => $application->id,
+        ]);
+
+        Carbon::setTestNow(now()->addDay());
+
+        $builds = app()->make(BuildRepository::class);
+
+        $update = $builds->getUpdate($application, $platform, '12.0.16-beta');
+
+        $this->assertNull($update);
+    }
+
+    /**
+     * @test
+     */
+    public function getUpdate_returns_build_when_device_version_in_catalog_is_dismissed_and_is_higher()
+    {
+        $application = factory(Application::class)->create();
+        $platform = new AndroidPlatform();
+
+        // Latest healthy build available
+        factory(Build::class)->states(['Android'])->create([
+            'version' => '12.0.15',
+            'application_id' => $application->id,
+            'available_from' => Carbon::now()->subDay(),
+        ]);
+
+        // Device's version exists in the catalog but has been dismissed:
+        // it must be treated as not available, so the device is pushed back
+        // to the latest healthy build with a forced update.
+        factory(Build::class)->states(['Android', 'dismissed'])->create([
+            'version' => '12.0.16',
+            'application_id' => $application->id,
+            'available_from' => Carbon::now()->subDay(),
+        ]);
+
+        Carbon::setTestNow(now()->addDay());
+
+        $builds = app()->make(BuildRepository::class);
+
+        $update = $builds->getUpdate($application, $platform, '12.0.16');
+
+        $this->assertInstanceOf(Build::class, $update);
+        $this->assertEquals('12.0.15', $update->version);
     }
 
     /**

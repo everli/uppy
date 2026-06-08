@@ -125,6 +125,22 @@ class BuildRepository
             return null;
         }
 
+        // If the device's reported version is not present in this
+        // app+platform catalog, the device is on a different cluster/track.
+        // Return the latest available build to force an update, regardless
+        // of how the versions compare numerically. Dismissed builds are
+        // excluded so a device stuck on a dismissed (and highest) version
+        // is also pushed back to the latest healthy build.
+        $versionExistsInCatalog = $application->builds()
+            ->where('platform', $platform->getId())
+            ->where('version', $version)
+            ->where('dismissed', false)
+            ->exists();
+
+        if (!$versionExistsInCatalog) {
+            return $lastAvailableBuild;
+        }
+
         if (Comparator::greaterThan($version, $lastAvailableBuild->version)) {
             return null;
         }
