@@ -10,6 +10,7 @@ use App\Platforms\Platform;
 use App\Platforms\PlatformService;
 use Carbon\Carbon;
 use Composer\Semver\Comparator;
+use Composer\Semver\VersionParser;
 use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
@@ -131,14 +132,22 @@ class BuildRepository
         // of how the versions compare numerically. Dismissed builds are
         // excluded so a device stuck on a dismissed (and highest) version
         // is also pushed back to the latest healthy build.
-        $versionExistsInCatalog = $application->builds()
-            ->where('platform', $platform->getId())
-            ->where('version', $version)
-            ->where('dismissed', false)
-            ->exists();
+        //
+        // Dev builds (carrying a "-dev" pre-release tag) live on their own
+        // track and are rebuilt on every merge, so they skip this
+        // cross-cluster forcing and fall back to the plain semver comparison
+        // below: they are never pushed just because their exact version is
+        // not catalogued.
+        if ($this->shouldForceUpdate($version)) {
+            $versionExistsInCatalog = $application->builds()
+                ->where('platform', $platform->getId())
+                ->where('version', $version)
+                ->where('dismissed', false)
+                ->exists();
 
-        if (!$versionExistsInCatalog) {
-            return $lastAvailableBuild;
+            if (!$versionExistsInCatalog) {
+                return $lastAvailableBuild;
+            }
         }
 
         if (Comparator::greaterThan($version, $lastAvailableBuild->version)) {
@@ -150,6 +159,22 @@ class BuildRepository
         }
 
         return $lastAvailableBuild;
+    }
+
+    /**
+     * Whether a forced update may be applied to the given device version.
+     *
+     * Dev builds always carry a "-dev" pre-release tag and live on their own
+     * track (the staging app is rebuilt on every merge), so they must never
+     * be force-updated. Every other stability (stable, beta, ...) forces as
+     * usual.
+     *
+     * @param  string  $version
+     * @return bool
+     */
+    public function shouldForceUpdate(string $version): bool
+    {
+        return VersionParser::parseStability($version) !== 'dev';
     }
 
     /**

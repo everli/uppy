@@ -349,6 +349,39 @@ class ApplicationApiControllerTest extends TestCase
     /**
      * @test
      */
+    public function it_never_forces_update_for_dev_versions()
+    {
+        $application = $this->makeApplicationModel();
+        $platform = new AndroidPlatform();
+
+        Carbon::setTestNow(Carbon::today()->subWeek());
+        $this->makeBuildModel($application->id, $platform->getId(), [
+            'version' => '12.0.17',
+            'available_from' => Carbon::today()->subWeek(),
+        ]);
+
+        Carbon::setTestNow(Carbon::today()->addDay());
+
+        $this->expectsEvents(UpdateCheck::class);
+
+        // Device on a dev build not present in the catalog: a newer build
+        // exists, so it is offered, but it must NOT be flagged as forced.
+        $response = $this->post(route('api.v2.updates.get', [
+            'application' => $application->slug,
+            'platform' => $platform->getId(),
+        ]), [
+            'version' => '12.0.16-dev',
+            'device_id' => 'aUniqueId'
+        ]);
+
+        $response->assertSuccessful();
+        $this->assertSame('12.0.17', $response->json('data.version'));
+        $this->assertFalse($response->json('data.forced'));
+    }
+
+    /**
+     * @test
+     */
     public function it_returns_non_forced_update_when_device_version_is_in_catalog()
     {
         $application = $this->makeApplicationModel();
