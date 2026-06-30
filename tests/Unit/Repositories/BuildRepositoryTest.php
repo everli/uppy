@@ -611,6 +611,62 @@ class BuildRepositoryTest extends TestCase
     /**
      * @test
      */
+    public function getUpdate_does_not_force_dev_version_not_in_catalog()
+    {
+        $application = factory(Application::class)->create();
+        $platform = new AndroidPlatform();
+
+        // Catalog only has an older build
+        factory(Build::class)->states(['Android'])->create([
+            'version' => '12.0.17',
+            'application_id' => $application->id,
+            'available_from' => Carbon::now()->subDay(),
+        ]);
+
+        Carbon::setTestNow(now()->addDay());
+
+        $builds = app()->make(BuildRepository::class);
+
+        // Device on a dev build (-dev) not present in the catalog: dev builds
+        // are never force-updated, so it is not pushed to the latest build
+        // just for being uncatalogued. The version is higher than the latest,
+        // so there is genuinely no update.
+        $update = $builds->getUpdate($application, $platform, '12.0.20-dev');
+
+        $this->assertNull($update);
+    }
+
+    /**
+     * @test
+     */
+    public function getUpdate_still_offers_newer_build_for_dev_version()
+    {
+        $application = factory(Application::class)->create();
+        $platform = new AndroidPlatform();
+
+        // A newer build is available in the catalog
+        factory(Build::class)->states(['Android'])->create([
+            'version' => '12.0.20',
+            'application_id' => $application->id,
+            'available_from' => Carbon::now()->subDay(),
+        ]);
+
+        Carbon::setTestNow(now()->addDay());
+
+        $builds = app()->make(BuildRepository::class);
+
+        // Device on an older dev build not in the catalog: skipping forcing
+        // does not suppress a genuine newer build, it is still offered (the
+        // controller flags it as non-forced).
+        $update = $builds->getUpdate($application, $platform, '12.0.17-dev');
+
+        $this->assertInstanceOf(Build::class, $update);
+        $this->assertEquals('12.0.20', $update->version);
+    }
+
+    /**
+     * @test
+     */
     public function it_return_the_last_undismissed_build()
     {
         // Create the application

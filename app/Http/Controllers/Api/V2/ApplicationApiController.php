@@ -62,10 +62,13 @@ class ApplicationApiController extends Controller
 
         // If the device's reported version is not in this app+platform catalog,
         // it has come from a different cluster/track and we need to force an update.
+        // Dev builds ("-dev" pre-release) never force: they have their own track.
         $versionNotInCatalog = $currentBuild === null;
+        $shouldForce = $this->builds->shouldForceUpdate($request->get('version'))
+            && ($versionNotInCatalog || (optional($currentBuild)->dismissed ?? false));
 
         return ApplicationUpdateResource::make($newBuild)
-            ->withForcedFlag($versionNotInCatalog || (optional($currentBuild)->dismissed ?? false));
+            ->withForcedFlag($shouldForce);
     }
 
 }
