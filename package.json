@@ -10,7 +10,7 @@
   "devDependencies": {
     "@tailwindcss/custom-forms": "^0.2.1",
     "@tailwindcss/typography": "^0.2.0",
-    "axios": "^0.21.4",
+    "axios": "^1.6.0",
     "cross-env": "^5.1",
     "laravel-mix": "^6.0.43",
     "lodash": "^4.17.20",
